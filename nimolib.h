@@ -5,7 +5,7 @@
 #define INT_FLASH_PAGE_SIZE 2048
 
 /*Uart config */
-#define PRINTF_BUFF_SIZE 100
+#define PRINTF_BUFF_SIZE 0
 #define DEBUG_UART UART_CHAN0
 #define PRINTF_UART UART_CHAN0
 #define UART_CHAN0 0
