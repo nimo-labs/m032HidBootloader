@@ -182,7 +182,7 @@ int main(void)
                         dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
                         intFlashWrite(pkt.address+(i), dataWord);
                     }
-                    hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_PTYPE_ACK, NULL, 0);
+                    hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                     usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
                 }
