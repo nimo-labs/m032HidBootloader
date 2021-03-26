@@ -172,7 +172,7 @@ int main(void)
                 /*Make sure we don't erase ourself!*/
                 if(pkt.address >= BL_APPLICATION_ENTRY)
                 {
-                    if(0==(pkt.address % 4096))
+                    if(0==(pkt.address % INT_FLASH_PAGE_SIZE))
                     {
                         if(-1 == intFlashErase(pkt.address))
                             intFlashErase(pkt.address);
@@ -186,6 +186,16 @@ int main(void)
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                     usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
                 }
+            }
+            else if(HID_BL_PROTOCOL_ERASE_INT_FLASH == pkt.packetType) /* Jump to application*/
+            {
+                for(uint32_t i=BL_APPLICATION_ENTRY; i < 0x40000; i+=INT_FLASH_PAGE_SIZE)
+                {
+                    intFlashErase(i);
+                }
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_RUN_INT == pkt.packetType) /* Jump to application*/
             {

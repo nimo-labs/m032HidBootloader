@@ -1,6 +1,9 @@
 /*Main processor clock */
 #define UP_CLK 48000000
 
+/* Flash page size*/
+#define INT_FLASH_PAGE_SIZE 2048
+
 /*Uart config */
 #define PRINTF_BUFF_SIZE 100
 #define DEBUG_UART UART_CHAN0
@@ -11,3 +14,4 @@
 
 /* USB HID */
 #define USB_BUFFER_SIZE 64
+
