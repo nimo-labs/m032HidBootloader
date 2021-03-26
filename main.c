@@ -49,20 +49,6 @@ void printStr(char *str)
         uartTx(DEBUG_UART, *str++);
 }
 
-void printOutputHex(char *marker, unsigned char *data, unsigned char dataLen)
-{
-    const char hex[]="0123456789ABCDEF";
-    printStr(marker);
-    printStr(": 0x");
-    for (unsigned int i = 0; i < dataLen; i++)
-    {
-        uartTx(DEBUG_UART, hex[(data[i] >> 4)&0xf]);
-        uartTx(DEBUG_UART, hex[data[i] &0xf]);
-    }
-    printStr("\r\n");
-}
-
-
 void startApp(void)
 {
     /* Pointer to the Application Section */
