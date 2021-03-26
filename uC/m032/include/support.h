@@ -1,1 +1,0 @@
-void SYS_UnlockReg(void);

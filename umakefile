@@ -1,0 +1,41 @@
+{
+	"target": "m032Hidbootloader",
+    "microcontroller": "m032lg6ae",
+    "toolchain": "arm-none-eabi",
+    "c_sources": [
+        "main.c",
+		"hidBlProtocol.c",
+		"./umake/nimolib/uC/m032/_syscalls.c",
+		"./umake/nimolib/uC/m032/support.c"
+    ],
+    "includes": [
+        "./"
+    ],
+	"linkerFile": "./umake/nimolib/uC/m032/linker/gcc_arm_256k_32k_bl.ld",
+    "buildDir": "./build",
+    "libraries": [
+     	{
+           	"libName": "nimolib",
+           	"libPath": "https://github.com/nimo-labs/nimolib.git",
+			"branch": "m032ld2ae",
+    		"books":[
+				"gpio",
+				"delay",
+				"uart",
+				"usbHid",
+				"intFlash",
+				"printf"
+        	]
+	    }
+	],
+	"targets":[
+		{
+			"targetName": "program",
+			"depends": "all",
+			"content":[
+				"killall -s 9 openocd || true",
+				"~/OpenOCD/bin/openocd -f ./umake/nimolib/uC/m032/openocd/openocd.cfg -d1 -c init -c \" halt \" -c \" flash write_image erase $(BUILD)/${BIN}.hex\" -c \" verify_image $(BUILD)/${BIN}.hex\" -c \" reset run \" -c \" exit \""
+			]
+		}
+	]
+}

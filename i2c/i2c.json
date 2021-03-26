@@ -1,9 +1,0 @@
-{
-	"book": "i2c",
-	"files": [
-		{
-			"fileName": "i2c.c",
-			"language": "c"
-		}
-	]
-}

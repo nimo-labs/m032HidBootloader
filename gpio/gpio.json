@@ -1,9 +1,0 @@
-{
-    "book": "gpio",
-    "files": [
-        {
-            "fileName": "gpio.c",
-            "language": "c"
-        }
-    ]
-}

@@ -33,3 +33,6 @@
 
 .vscode/*
 *.sync-conflict*
+build/*
+umake/*
+Makefile

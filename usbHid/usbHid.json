@@ -1,9 +1,0 @@
-{
-	"book": "usbHid",
-	"files": [
-		{
-			"fileName": "simpleHid.c",
-			"language": "c"
-		}
-	]
-}
