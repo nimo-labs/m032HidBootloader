@@ -18,7 +18,6 @@
      	{
            	"libName": "nimolib",
            	"libPath": "https://github.com/nimo-labs/nimolib.git",
-			"branch": "m032ld2ae",
     		"books":[
 				"gpio",
 				"delay",
