@@ -1,7 +1,6 @@
 /*
- * This file is part of the hid_bootloader_console_client distribution
- * (https://github.com/nimo-labs/hid_bootloader_console_client).
- * Copyright (c) 2020 Nimolabs Ltd. www.nimo.uk
+ * This file is part of the m032HidBootloader distribution (https://github.com/nimo-labs/m032HidBootloader).
+ * Copyright (c) 2021 Nimolabs Ltd. www.nimo.uk
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef HID_BL_PROTOCOL_H
 #define HID_BL_PROTOCOL_H
 

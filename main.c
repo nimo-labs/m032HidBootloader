@@ -1,5 +1,5 @@
 /*
- * This file is part of the umake distribution (https://github.com/nimo-labs/umake).
+ * This file is part of the m032HidBootloader distribution (https://github.com/nimo-labs/m032HidBootloader).
  * Copyright (c) 2021 Nimolabs Ltd. www.nimo.uk
  *
  * This program is free software: you can redistribute it and/or modify
