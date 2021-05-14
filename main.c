@@ -149,6 +149,9 @@ int main(void)
         printStr("Bootloader mode requested\r\n");
     }
 
+    printStr("Serial number: ");
+    printHex(SYS->PDID);
+
     delaySetup(DELAY_BASE_MILLI_SEC);
     usbInit();
 
@@ -215,8 +218,8 @@ int main(void)
             else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType) /* Jump to application*/
             {
                 uint32_t mfrId = intFlashReadCID();
-                printStr("Mfr ID: ");
-                printHex(mfrId);
+                // printStr("Mfr ID: ");
+                // printHex(mfrId);
 
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, 4);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
@@ -225,8 +228,8 @@ int main(void)
             else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType) /* Jump to application*/
             {
                 uint32_t partId = intFlashReadPID();
-                printStr("Product ID: ");
-                printHex(partId);
+                // printStr("Product ID: ");
+                // printHex(partId);
 
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, 4);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
