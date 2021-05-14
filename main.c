@@ -187,6 +187,12 @@ int main(void)
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                     usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
                 }
+                else
+                {
+                    hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
+                    hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                    usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                }
             }
             else if(HID_BL_PROTOCOL_ERASE_INT_FLASH == pkt.packetType) /* Jump to application*/
             {
