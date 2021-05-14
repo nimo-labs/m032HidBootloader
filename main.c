@@ -49,6 +49,21 @@ void printStr(char *str)
         uartTx(DEBUG_UART, *str++);
 }
 
+void printHex(uint32_t val)
+{
+    uint8_t hex[] = "0123456789ABCDEF";
+    printStr("0x");
+    uartTx(DEBUG_UART, hex[(val>>28) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>24) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>20) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>16) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>12) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>8) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>4) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val) & 0xf]);
+    printStr("\r\n");
+}
+
 void startApp(void)
 {
     /* Pointer to the Application Section */
@@ -185,8 +200,31 @@ int main(void)
             }
             else if(HID_BL_PROTOCOL_RUN_INT == pkt.packetType) /* Jump to application*/
             {
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
                 /*Reset to run application*/
                 SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
+            }
+            else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType) /* Jump to application*/
+            {
+                uint32_t mfrId = intFlashReadCID();
+                printStr("Mfr ID: ");
+                printHex(mfrId);
+
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, 4);
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+            }
+            else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType) /* Jump to application*/
+            {
+                uint32_t partId = intFlashReadPID();
+                printStr("Product ID: ");
+                printHex(partId);
+
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, 4);
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
             }
             usbDirty = 0;
         }
