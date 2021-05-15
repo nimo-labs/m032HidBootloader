@@ -35,6 +35,7 @@ extern void SYS_UnlockReg(void);
 
 /*Local project modules*/
 #include "hidBlProtocol.h"
+#include "version.h"
 
 unsigned char usbPkt[USB_BUFFER_SIZE];
 bool usbDirty = FALSE;
@@ -62,6 +63,46 @@ void printHex(uint32_t val)
     uartTx(DEBUG_UART, hex[(val>>4) & 0xf]);
     uartTx(DEBUG_UART, hex[(val) & 0xf]);
     printStr("\r\n");
+}
+
+void printDec(uint8_t val)
+{
+    uint8_t reg[3];
+    if(val > 99)
+    {
+        reg[0] = (val / 100) + 0x30;
+        val -= 100;
+    }
+    else
+    {
+        reg[0] = 0;
+    }
+    if(val > 9)
+    {
+        reg[1] = (val / 10) + 0x30;
+        val -= 10;
+    }
+    else
+    {
+        reg[1] = 0;
+    }
+    if(val > 0)
+    {
+        reg[2] = val  + 0x30;
+        val -= 10;
+    }
+    else
+    {
+        reg[2] = 0;
+    }
+
+    for(uint8_t i=0; i < 3; i++)
+    {
+        if(reg[i] > 0)
+            uartTx(DEBUG_UART, reg[i]);
+        else if(2 == i)
+            uartTx(DEBUG_UART, 0x30);
+    }
 }
 
 void startApp(void)
@@ -149,6 +190,12 @@ int main(void)
         printStr("Bootloader mode requested\r\n");
     }
 
+    printStr("Version: ");
+    printDec(VER_MAJ);
+    printStr(".");
+    printDec(VER_MIN);
+    printStr("\r\n");
+
     printStr("Serial number: ");
     printHex(SYS->PDID);
 
@@ -218,20 +265,27 @@ int main(void)
             else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType) /* Jump to application*/
             {
                 uint32_t mfrId = intFlashReadCID();
-                // printStr("Mfr ID: ");
-                // printHex(mfrId);
-
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, 4);
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, sizeof(mfrId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
             }
-            else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType) /* Jump to application*/
+            else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType)
             {
                 uint32_t partId = intFlashReadPID();
-                // printStr("Product ID: ");
-                // printHex(partId);
-
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, 4);
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, sizeof(partId));
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+            }
+            else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType)
+            {
+                uint16_t version = (VER_MAJ << 8) | VER_MIN;
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, &version, sizeof(version));
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+            }
+            else /*Send NAK due to unknown command */
+            {
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
             }
