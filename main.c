@@ -138,13 +138,13 @@ int main(void)
     struct hidBlProtocolPacket_s pkt;
     uint8_t bootSw;
 
-    GPIO_PIN_DIR(PORTC, 14, GPIO_DIR_OUT);
-    GPIO_PIN_OUT(PORTC, 14, GPIO_OUT_HIGH);
+    GPIO_PIN_DIR(GPIO_PORTC, 14, GPIO_DIR_OUT);
+    GPIO_PIN_OUT(GPIO_PORTC, 14, GPIO_OUT_HIGH);
 
-    GPIO_PIN_DIR(PORTC, 5, GPIO_DIR_OUT);
-    GPIO_PIN_OUT(PORTC, 5, GPIO_OUT_LOW);
+    GPIO_PIN_DIR(GPIO_PORTC, 5, GPIO_DIR_OUT);
+    GPIO_PIN_OUT(GPIO_PORTC, 5, GPIO_OUT_LOW);
 
-    GPIO_PIN_DIR(PORTB, 14, GPIO_DIR_IN);
+    GPIO_PIN_DIR(GPIO_PORTB, 14, GPIO_DIR_IN);
 
     SYS_UnlockReg();
     intFlashOpen();
@@ -168,7 +168,7 @@ int main(void)
     }
 
     /*Check for valid App*/
-    bootSw = GPIO_PIN_READ(PORTB,14);
+    bootSw = GPIO_PIN_READ(GPIO_PORTB,14);
     if(0 == bootSw)
     {
         uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
@@ -209,7 +209,7 @@ int main(void)
         if(delayMillis(ledLastTicks, 500))
         {
             ledLastTicks = delayGetTicks();
-            GPIO_PIN_TGL(PORTC, 14);
+            GPIO_PIN_TGL(GPIO_PORTC, 14);
         }
 
         if(usbDirty)
