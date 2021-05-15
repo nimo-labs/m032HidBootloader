@@ -31,7 +31,6 @@ jobs:
 #update version number
     - name: bump version
       run: |
-        cd bootloader
         cat version.h
         awk -f bumpver.awk version.h
         cat version.h
@@ -39,7 +38,7 @@ jobs:
     - name: commit version
       uses: test-room-7/action-update-file@v1
       with:
-          file-path: bootloader/version.h
+          file-path: version.h
           commit-msg: Update version number
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
