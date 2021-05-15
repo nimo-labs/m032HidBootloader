@@ -24,8 +24,10 @@ jobs:
       run: |
         cd bootloader
         ../umake
-    - name: arm-none-eabi-gcc
-    - uses: actions/arm-none-eabi-gcc@v1
+    #- name: arm-none-eabi-gcc
+    - uses: fiam/arm-none-eabi-gcc@v1
       with:
         release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
-      run: make
+    - run: |
+        cd bootloader
+        make
