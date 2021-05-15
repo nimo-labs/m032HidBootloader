@@ -37,7 +37,7 @@ jobs:
     - name: commit version
       uses: test-room-7/action-update-file@v1
       with:
-          file-path: version.h
+          file-path: bootloader/version.h
           commit-msg: Update version number
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
