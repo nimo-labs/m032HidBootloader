@@ -31,6 +31,8 @@ jobs:
 #update version number
     - name: bump version
       run: |
+        cd bootloader
+        ls -l
         cat version.h
         awk -f bumpver.awk version.h
         cat version.h
