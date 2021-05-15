@@ -1,4 +1,4 @@
-![Build status](https://github.com/nimo-labs/m032HidBootloader/actions/workflows/build.yml/badge.svg)
+![Build status](https://github.com/nimo-labs/m032HidBootloader/actions/workflows/build.yml/badge.svg?branch=dev)
 # M032 Hid Bootloader - NIMOLIB based USB HID bootloader for Nuvoton M032 devices
 
 A USB HID based bootloader for the Nuvoton M032 family of devices, currently the following devices are supported:
