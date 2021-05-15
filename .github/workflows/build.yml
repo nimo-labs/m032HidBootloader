@@ -8,60 +8,60 @@ on:
     branches:
       - master 
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: 'nimo-labs/umake'
-    - uses: actions/checkout@v2
-      with:
-        path: 'bootloader'
-    - name: umake
-      run: |
-        cd bootloader
-        ../umake
-    #- name: arm-none-eabi-gcc
-    - uses: fiam/arm-none-eabi-gcc@v1
-      with:
-        release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
-    - run: |
-        cd bootloader
-        make
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: 'nimo-labs/umake'
+      - uses: actions/checkout@v2
+        with:
+          path: 'bootloader'
+      - name: umake
+        run: |
+          cd bootloader
+          ../umake
+      #- name: arm-none-eabi-gcc
+      - uses: fiam/arm-none-eabi-gcc@v1
+        with:
+          release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
+      - run: |
+          cd bootloader
+          make
 
-#update version number
-    - name: bump version
-      run: |
-        cd bootloader
-        ls -l
-        cat version.h
-        awk -f bumpver.awk version.h
-        cat version.h
-        mv version.h ../
+  #update version number
+      - name: bump version
+        run: |
+          cd bootloader
+          ls -l
+          cat version.h
+          awk -f bumpver.awk version.h
+          cat version.h
+          mv version.h ../
 
-    - name: commit version
-      uses: test-room-7/action-update-file@v1
-      with:
-          file-path: version.h
-          commit-msg: Update version number
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: commit version
+        uses: test-room-7/action-update-file@v1
+        with:
+            file-path: version.h
+            commit-msg: Update version number
+            github-token: ${{ secrets.GITHUB_TOKEN }}
 
-#bump release if successful
+  #bump release if successful
 
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: false
-        title: "Development Build"
-        files: |
-          bootloader/build/m032Hidbootloader.bin
-#merge back to dev
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "Development Build"
+          files: |
+            bootloader/build/m032Hidbootloader.bin
+  #merge back to dev
 
-    - name: Merge master -> dev
-      uses: devmasx/merge-branch@v1.3.1
-      with:
-        type: now
-        target_branch: dev
-        github_token: ${{ github.token }}
+      - name: Merge master -> dev
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          target_branch: dev
+          github_token: ${{ github.token }}
