@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
       with:
@@ -29,3 +27,12 @@ jobs:
     - run: |
         cd bootloader
         make
+
+#bump release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: ${{ secrets.release_commit }}
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build"
