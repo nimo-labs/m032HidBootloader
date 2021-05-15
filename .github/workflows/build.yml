@@ -28,6 +28,19 @@ jobs:
         cd bootloader
         make
 
+#update version number
+    - name: bump version
+      run: |
+        cd bootloader
+        awk -f bumpver.awk version.h
+
+    - name: commit version
+      uses: test-room-7/action-update-file@v1
+      with:
+          file-path: version.h
+          commit-msg: Update version number
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
 #bump release if successful
 
     - uses: "marvinpinto/action-automatic-releases@latest"
