@@ -2,9 +2,11 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ master ]
+    branches: 
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master 
 
 jobs:
   build:
@@ -55,3 +57,11 @@ jobs:
         title: "Development Build"
         files: |
           bootloader/build/m032Hidbootloader.bin
+#merge back to dev
+
+    - name: Merge master -> dev
+      uses: devmasx/merge-branch@v1.3.1
+      with:
+        type: now
+        target_branch: dev
+        github_token: ${{ github.token }}
