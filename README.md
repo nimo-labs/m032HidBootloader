@@ -10,6 +10,7 @@ The bootloader requres the following prerequisites:
 - arm-none-eabi-gcc compiler
 - [umake](https://github.com/nimo-labs/umake) build system
 
+To build...
 - Install prerequisites
 - Run umake in the repository root directory to download the libraries and generate the Makefile
 - Run make in the repository root directory to build the binary
