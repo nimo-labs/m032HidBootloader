@@ -32,7 +32,9 @@ jobs:
     - name: bump version
       run: |
         cd bootloader
+        cat version.h
         awk -f bumpver.awk version.h
+        cat version.h
 
     - name: commit version
       uses: test-room-7/action-update-file@v1
