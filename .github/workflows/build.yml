@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@vs
+    - uses: actions/checkout@v2
       repository: 'https://github.com/nimo-labs/umake.git'
     - name: umake
       run: ./umake/umake
