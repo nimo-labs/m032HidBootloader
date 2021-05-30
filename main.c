@@ -278,6 +278,7 @@ int main(void)
             }
             else if(HID_BL_PROTOCOL_GET_BL_VER == pkt.packetType)
             {
+                //          printStr("Get ver\r\n");
                 uint16_t version = (VER_MAJ << 8) | VER_MIN;
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, &version, sizeof(version));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
