@@ -62,7 +62,6 @@ void printHex(uint32_t val)
     uartTx(DEBUG_UART, hex[(val>>8) & 0xf]);
     uartTx(DEBUG_UART, hex[(val>>4) & 0xf]);
     uartTx(DEBUG_UART, hex[(val) & 0xf]);
-    printStr("\r\n");
 }
 
 void printDec(uint8_t val)
@@ -220,6 +219,9 @@ int main(void)
 
             if(HID_BL_PROTOCOL_WRITE_INT_FLASH == pkt.packetType)
             {
+                printStr("Address: ");
+                printHex(pkt.address);
+                printStr("\r\n");
                 /*Make sure we don't erase ourself!*/
                 if(pkt.address >= BL_APPLICATION_ENTRY)
                 {
@@ -228,11 +230,15 @@ int main(void)
                         if(-1 == intFlashErase(pkt.address))
                             intFlashErase(pkt.address);
                     }
+
                     for(int i=0; i < pkt.dataLen; i+=4)
                     {
                         dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
                         intFlashWrite(pkt.address+(i), dataWord);
+                        printHex(dataWord);
+                        printStr(" ");
                     }
+                    printStr("\r\n");
                     hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                     usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
