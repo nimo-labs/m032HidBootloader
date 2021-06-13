@@ -22,7 +22,6 @@
     		"books":[
 				"gpio",
 				"delay",
-				"uart",
 				"usbHid",
 				"intFlash",
 				"printf"
