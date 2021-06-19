@@ -43,6 +43,10 @@ bool usbDirty = FALSE;
 #define BL_APPLICATION_ENTRY 0x3000
 #define APP_START_RESET_VEC_ADDRESS (BL_APPLICATION_ENTRY + (uint32_t)0x00000004)
 
+//#define BOOT_MAGIC_VALUE extern (*((volatile uint32_t *) &BOOT_MAGIC_ADDRESS))
+
+extern uint32_t BOOT_MAGIC_ADDRESS;
+
 /* Helper functions */
 // void printStr(char *str)
 // {
@@ -177,7 +181,9 @@ int main(void)
 
     /*Check for valid App*/
     bootSw = GPIO_PIN_READ(GPIO_PORTB,14);
-    if(0 == bootSw)
+    volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
+
+    if((0 == bootSw) && (0x0000DEAD != bootMagicAddress))
     {
         uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
         if (0xffffffff != msp)
