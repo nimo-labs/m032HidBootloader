@@ -52,14 +52,14 @@ extern uint32_t BOOT_MAGIC_ADDRESS;
 // {
 //     unsigned char i = 0;
 //     char *strOrig = str;
-//     while(*str)
-//     {
-//         i++;
-//         *str++;
-//     }
-//     usbSend(EP_INPUT, strOrig, i);
 //     // while(*str)
-//     //     uartTx(DEBUG_UART, *str++);
+//     // {
+//     //     i++;
+//     //     *str++;
+//     // }
+//     // usbSend(EP_INPUT, strOrig, i);
+//     while(*str)
+//         uartTx(DEBUG_UART, *str++);
 // }
 
 // void printHex(uint32_t val)
@@ -139,7 +139,6 @@ void startApp(void)
 
 /*---------------------------------------------------------------------------------------------------------
 * Main Function
-* Turns on the red LED of the NuMaker-M032LD dev board
 *
 * Note that the Nuvoton version of OpenOCD is required: https://github.com/OpenNuvoton/OpenOCD-Nuvoton
 *---------------------------------------------------------------------------------------------------------*/
@@ -183,7 +182,7 @@ int main(void)
     bootSw = GPIO_PIN_READ(GPIO_PORTB,14);
     volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
-    if((0 == bootSw) && (0x0000DEAD != bootMagicAddress))
+    if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
     {
         uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
         if (0xffffffff != msp)
@@ -203,6 +202,7 @@ int main(void)
         // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
         // printStr("Bootloader mode requested\r\n");
     }
+    *bootMagicAddress = 0xFFFFFFFF;
 
     // printStr("Version: ");
     // printDec(VER_MAJ);
