@@ -26,7 +26,7 @@
 /*Nimolib books*/
 #include <gpio.h>
 #include <delay.h>
-#include <uart.h>
+//#include <uart.h>
 #include <simpleHid.h>
 #include <intFlash.h>
 
@@ -43,66 +43,78 @@ bool usbDirty = FALSE;
 #define BL_APPLICATION_ENTRY 0x3000
 #define APP_START_RESET_VEC_ADDRESS (BL_APPLICATION_ENTRY + (uint32_t)0x00000004)
 
+//#define BOOT_MAGIC_VALUE extern (*((volatile uint32_t *) &BOOT_MAGIC_ADDRESS))
+
+extern uint32_t BOOT_MAGIC_ADDRESS;
+
 /* Helper functions */
-void printStr(char *str)
-{
-    while(*str)
-        uartTx(DEBUG_UART, *str++);
-}
+// void printStr(char *str)
+// {
+//     unsigned char i = 0;
+//     char *strOrig = str;
+//     // while(*str)
+//     // {
+//     //     i++;
+//     //     *str++;
+//     // }
+//     // usbSend(EP_INPUT, strOrig, i);
+//     while(*str)
+//         uartTx(DEBUG_UART, *str++);
+// }
 
-void printHex(uint32_t val)
-{
-    uint8_t hex[] = "0123456789ABCDEF";
-    printStr("0x");
-    uartTx(DEBUG_UART, hex[(val>>28) & 0xf]);
-    uartTx(DEBUG_UART, hex[(val>>24) & 0xf]);
-    uartTx(DEBUG_UART, hex[(val>>20) & 0xf]);
-    uartTx(DEBUG_UART, hex[(val>>16) & 0xf]);
-    uartTx(DEBUG_UART, hex[(val>>12) & 0xf]);
-    uartTx(DEBUG_UART, hex[(val>>8) & 0xf]);
-    uartTx(DEBUG_UART, hex[(val>>4) & 0xf]);
-    uartTx(DEBUG_UART, hex[(val) & 0xf]);
-}
+// void printHex(uint32_t val)
+// {
+//     uint8_t hex[] = "0123456789ABCDEF";
+//     printStr("0x");
+//     uartTx(DEBUG_UART, hex[(val>>28) & 0xf]);
+//     uartTx(DEBUG_UART, hex[(val>>24) & 0xf]);
+//     uartTx(DEBUG_UART, hex[(val>>20) & 0xf]);
+//     uartTx(DEBUG_UART, hex[(val>>16) & 0xf]);
+//     uartTx(DEBUG_UART, hex[(val>>12) & 0xf]);
+//     uartTx(DEBUG_UART, hex[(val>>8) & 0xf]);
+//     uartTx(DEBUG_UART, hex[(val>>4) & 0xf]);
+//     uartTx(DEBUG_UART, hex[(val) & 0xf]);
+// }
 
-void printDec(uint8_t val)
-{
-    uint8_t reg[3];
-    if(val > 99)
-    {
-        reg[0] = (val / 100) + 0x30;
-        val -= 100;
-    }
-    else
-    {
-        reg[0] = 0;
-    }
-    if(val > 9)
-    {
-        reg[1] = (val / 10) + 0x30;
-        val -= 10;
-    }
-    else
-    {
-        reg[1] = 0;
-    }
-    if(val > 0)
-    {
-        reg[2] = val  + 0x30;
-        val -= 10;
-    }
-    else
-    {
-        reg[2] = 0;
-    }
+// void printDec(uint8_t val)
+// {
+//     uint8_t reg[3];
+//     if(val > 99)
+//     {
+//         reg[0] = (val / 100) + 0x30;
+//         val -= 100;
+//     }
+//     else
+//     {
+//         reg[0] = 0;
+//     }
+//     if(val > 9)
+//     {
+//         reg[1] = (val / 10) + 0x30;
+//         val -= 10;
+//     }
+//     else
+//     {
+//         reg[1] = 0;
+//     }
+//     if(val > 0)
+//     {
+//         reg[2] = val  + 0x30;
+//         val -= 10;
+//     }
+//     else
+//     {
+//         reg[2] = 0;
+//     }
 
-    for(uint8_t i=0; i < 3; i++)
-    {
-        if(reg[i] > 0)
-            uartTx(DEBUG_UART, reg[i]);
-        else if(2 == i)
-            uartTx(DEBUG_UART, 0x30);
-    }
-}
+//     for(uint8_t i=0; i < 3; i++)
+//     {
+//         if(reg[i] > 0)
+//             uartTx(DEBUG_UART, reg[i]);
+//         else if(2 == i)
+//             uartTx(DEBUG_UART, 0x30);
+//     }
+// }
 
 void startApp(void)
 {
@@ -127,7 +139,6 @@ void startApp(void)
 
 /*---------------------------------------------------------------------------------------------------------
 * Main Function
-* Turns on the red LED of the NuMaker-M032LD dev board
 *
 * Note that the Nuvoton version of OpenOCD is required: https://github.com/OpenNuvoton/OpenOCD-Nuvoton
 *---------------------------------------------------------------------------------------------------------*/
@@ -153,9 +164,9 @@ int main(void)
     uint32_t flashDataWord = intFlashRead(FMC_CONFIG_BASE);
     if(0x02 != ((flashDataWord & 0xC0) >> 6))
     {
-        uartInit(DEBUG_UART, UART_BAUD_115200);
-        printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-        printStr("Updating config\r\n");
+        // uartInit(DEBUG_UART, UART_BAUD_115200);
+        // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+        // printStr("Updating config\r\n");
         delaySetup(DELAY_BASE_MILLI_SEC);
         FMC_ENABLE_CFG_UPDATE();
         uint32_t flashDataWord = 0xffffffbf;
@@ -166,9 +177,12 @@ int main(void)
         SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
     }
 
+
     /*Check for valid App*/
     bootSw = GPIO_PIN_READ(GPIO_PORTB,14);
-    if(0 == bootSw)
+    volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
+
+    if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
     {
         uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
         if (0xffffffff != msp)
@@ -177,30 +191,31 @@ int main(void)
         }
         else
         {
-            uartInit(DEBUG_UART, UART_BAUD_115200);
-            printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-            printStr("No application found\r\n");
+            // uartInit(DEBUG_UART, UART_BAUD_115200);
+            // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+            // printStr("No application found\r\n");
         }
     }
     else
     {
-        uartInit(DEBUG_UART, UART_BAUD_115200);
-        printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-        printStr("Bootloader mode requested\r\n");
+        // uartInit(DEBUG_UART, UART_BAUD_115200);
+        // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+        // printStr("Bootloader mode requested\r\n");
     }
+    *bootMagicAddress = 0xFFFFFFFF;
 
-    printStr("Version: ");
-    printDec(VER_MAJ);
-    printStr(".");
-    printDec(VER_MIN);
-    printStr("\r\n");
+    // printStr("Version: ");
+    // printDec(VER_MAJ);
+    // printStr(".");
+    // printDec(VER_MIN);
+    // printStr("\r\n");
 
-    printStr("Serial number: ");
-    printHex(SYS->PDID);
+    // printStr("Serial number: ");
+    // printHex(SYS->PDID);
 
+    //usbInit();
     delaySetup(DELAY_BASE_MILLI_SEC);
     usbInit();
-
     ledLastTicks = delayGetTicks();
 
     while(1)
@@ -219,9 +234,9 @@ int main(void)
 
             if(HID_BL_PROTOCOL_WRITE_INT_FLASH == pkt.packetType)
             {
-                printStr("Address: ");
-                printHex(pkt.address);
-                printStr("\r\n");
+                // printStr("Address: ");
+                // printHex(pkt.address);
+                // printStr("\r\n");
                 /*Make sure we don't erase ourself!*/
                 if(pkt.address >= BL_APPLICATION_ENTRY)
                 {
@@ -235,10 +250,10 @@ int main(void)
                     {
                         dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
                         intFlashWrite(pkt.address+(i), dataWord);
-                        printHex(dataWord);
-                        printStr(" ");
+                        // printHex(dataWord);
+                        // printStr(" ");
                     }
-                    printStr("\r\n");
+                    // printStr("\r\n");
                     hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                     usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
