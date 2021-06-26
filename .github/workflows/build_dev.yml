@@ -27,24 +27,3 @@ jobs:
     - run: |
         cd bootloader
         make
-    - name: Semantic Release
-      uses: cycjimmy/semantic-release-action@v2
-            # you can set branches for semantic-release above v16.
-      with:
-        semantic_version: 16
-        branches: |    
-          [
-            '+([0-9])?(.{+([0-9]),x}).x',
-            'master', 
-            'dev',  
-            {
-              name: 'beta', 
-              prerelease: true
-            }, 
-            {
-              name: 'alpha', 
-              prerelease: true
-            }
-          ]
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
