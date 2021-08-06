@@ -32,3 +32,7 @@
 /* USB HID */
 #define USB_BUFFER_SIZE 64
 
+#if defined(__SAMR21) || defined(__SAMD21)
+#define PERHIP_CLK_GEN 0
+#endif
+
