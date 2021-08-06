@@ -35,7 +35,6 @@
 #include <intFlash.h>
 
 #define HELPER 0
-
 #include "helper.h"
 
 
@@ -87,25 +86,25 @@ int main(void)
     struct hidBlProtocolPacket_s pkt;
     uint8_t bootSw;
 
-    GPIO_PIN_DIR(GPIO_PORTC, 14, GPIO_DIR_OUT);
-    GPIO_PIN_OUT(GPIO_PORTC, 14, GPIO_OUT_HIGH);
+    GPIO_PIN_DIR(BL_LED_PORT, BL_LED_PIN, GPIO_DIR_OUT);
+    GPIO_PIN_OUT(BL_LED_PORT, BL_LED_PIN, GPIO_OUT_HIGH);
 
-    GPIO_PIN_DIR(GPIO_PORTC, 5, GPIO_DIR_OUT);
-    GPIO_PIN_OUT(GPIO_PORTC, 5, GPIO_OUT_LOW);
+    GPIO_PIN_DIR(BL_SW_PORT, BL_SW_PIN, GPIO_DIR_IN);
 
-    GPIO_PIN_DIR(GPIO_PORTB, 14, GPIO_DIR_IN);
-
+    /*Nuvoton specific flash bank switching*/
+#if defined(__NUVO_M032K)
     SYS_UnlockReg();
     intFlashOpen();
     FMC_ENABLE_AP_UPDATE();
-
     /*Read config first, if not set then setup and issue uC reboot*/
     uint32_t flashDataWord = intFlashRead(FMC_CONFIG_BASE);
     if(0x02 != ((flashDataWord & 0xC0) >> 6))
     {
-        // uartInit(DEBUG_UART, UART_BAUD_115200);
-        // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-        // printStr("Updating config\r\n");
+#if HELPER == 1
+        uartInit(DEBUG_UART, UART_BAUD_115200);
+        printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+        printStr("Updating config\r\n");
+#endif
         delaySetup(DELAY_BASE_MILLI_SEC);
         FMC_ENABLE_CFG_UPDATE();
         uint32_t flashDataWord = 0xffffffbf;
@@ -115,10 +114,10 @@ int main(void)
         delayMs(1000);
         SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
     }
-
-
+#endif
+    /******************************************************/
     /*Check for valid App*/
-    bootSw = GPIO_PIN_READ(GPIO_PORTB,14);
+    bootSw = GPIO_PIN_READ(BL_SW_PORT, BL_SW_PIN);
     volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
     if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
@@ -130,28 +129,33 @@ int main(void)
         }
         else
         {
-            // uartInit(DEBUG_UART, UART_BAUD_115200);
-            // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-            // printStr("No application found\r\n");
+#if HELPER == 1
+            uartInit(DEBUG_UART, UART_BAUD_115200);
+            printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+            printStr("No application found\r\n");
+#endif
         }
     }
     else
     {
-        // uartInit(DEBUG_UART, UART_BAUD_115200);
-        // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-        // printStr("Bootloader mode requested\r\n");
+#if HELPER == 1
+        uartInit(DEBUG_UART, UART_BAUD_115200);
+        printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+        printStr("Bootloader mode requested\r\n");
+#endif
     }
     *bootMagicAddress = 0xFFFFFFFF;
 
-    // printStr("Version: ");
-    // printDec(VER_MAJ);
-    // printStr(".");
-    // printDec(VER_MIN);
-    // printStr("\r\n");
+#if HELPER == 1
+    printStr("Version: ");
+    printDec(VER_MAJ);
+    printStr(".");
+    printDec(VER_MIN);
+    printStr("\r\n");
 
-    // printStr("Serial number: ");
-    // printHex(SYS->PDID);
-
+    printStr("Serial number: ");
+    printHex(SYS->PDID);
+#endif
     //usbInit();
     delaySetup(DELAY_BASE_MILLI_SEC);
     usbInit();
@@ -162,7 +166,7 @@ int main(void)
         if(delayMillis(ledLastTicks, 500))
         {
             ledLastTicks = delayGetTicks();
-            GPIO_PIN_TGL(GPIO_PORTC, 14);
+            GPIO_PIN_TGL(BL_LED_PORT, BL_LED_PIN);
         }
 
         if(usbDirty)

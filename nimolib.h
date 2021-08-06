@@ -32,6 +32,13 @@
 /* USB HID */
 #define USB_BUFFER_SIZE 64
 
+/* UI defn's */
+#define BL_LED_PORT GPIO_PORTC
+#define BL_LED_PIN 14
+#define BL_SW_PORT GPIO_PORTB
+#define BL_SW_PIN 14
+/*************/
+
 #if defined(__SAMR21) || defined(__SAMD21)
 #define PERHIP_CLK_GEN 0
 #endif
