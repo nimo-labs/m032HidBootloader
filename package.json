@@ -2,6 +2,7 @@
 	"name": "foo",
 	"version": "0.0.0",
 	"dependencies": {
-		"nimolib": "nimo-labs/nimolib"
+		"nimolib": "nimo-labs/nimolib",
+		"umake": "nimo-labs/umake"
 	}
 }
