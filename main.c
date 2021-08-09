@@ -33,6 +33,7 @@
 #include <delay.h>
 #include <simpleHid.h>
 #include <intFlash.h>
+#include <sysCore.h>
 
 #define HELPER 0
 #include "helper.h"
@@ -199,13 +200,13 @@ int main(void)
                     // printStr("\r\n");
                     hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                    usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                    usbSend( usbPkt, USB_BUFFER_SIZE);
                 }
                 else
                 {
                     hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                    usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                    usbSend( usbPkt, USB_BUFFER_SIZE);
                 }
             }
             else if(HID_BL_PROTOCOL_ERASE_INT_FLASH == pkt.packetType)
@@ -216,29 +217,29 @@ int main(void)
                 }
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_RUN_INT == pkt.packetType) /* Jump to application*/
             {
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
                 /*Reset to run application*/
-                SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
+                sysCoreuCReset();
             }
             else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType)
             {
                 uint32_t mfrId = intFlashReadCID();
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, sizeof(mfrId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType)
             {
                 uint32_t partId = intFlashReadPID();
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, sizeof(partId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_GET_BL_VER == pkt.packetType)
             {
@@ -246,13 +247,13 @@ int main(void)
                 uint16_t version = (VER_MAJ << 8) | VER_MIN;
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, &version, sizeof(version));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else /*Send NAK due to unknown command */
             {
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             usbDirty = 0;
         }
