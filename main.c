@@ -34,8 +34,11 @@
 #include <simpleHid.h>
 #include <intFlash.h>
 #include <sysCore.h>
+#if defined(__SAMR21) || defined(__SAMD21)
+#include <osc.h>
+#endif
 
-#define HELPER 0
+#define HELPER 1
 #include "helper.h"
 
 
@@ -92,6 +95,11 @@ int main(void)
 
     GPIO_PIN_DIR(BL_SW_PORT, BL_SW_PIN, GPIO_DIR_IN);
 
+
+#if defined(__SAMR21) || defined(__SAMD21)
+    oscSet(OSC_48DFLL);
+#endif
+
     /*Nuvoton specific flash bank switching*/
 #if defined(__NUVO_M032K)
     SYS_UnlockReg();
@@ -121,7 +129,7 @@ int main(void)
     bootSw = GPIO_PIN_READ(BL_SW_PORT, BL_SW_PIN);
     volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
-    if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
+    if((0 == bootSw))// && (0x0000DEAD != *bootMagicAddress))
     {
         uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
         if (0xffffffff != msp)
@@ -145,7 +153,7 @@ int main(void)
         printStr("Bootloader mode requested\r\n");
 #endif
     }
-    *bootMagicAddress = 0xFFFFFFFF;
+    // *bootMagicAddress = 0xFFFFFFFF;
 
 #if HELPER == 1
     printStr("Version: ");
@@ -154,8 +162,8 @@ int main(void)
     printDec(VER_MIN);
     printStr("\r\n");
 
-    printStr("Serial number: ");
-    printHex(SYS->PDID);
+    //printStr("Serial number: ");
+    //printHex(SYS->PDID);
 #endif
     //usbInit();
     delaySetup(DELAY_BASE_MILLI_SEC);
@@ -257,7 +265,10 @@ int main(void)
             }
             usbDirty = 0;
         }
-    }
+#if defined(__SAMR21) || defined(__SAMD21)
+        usbTask();
+#endif
+    } /*Maine while loop */
 }
 
 void usbHidProcess(uint8_t *req)
