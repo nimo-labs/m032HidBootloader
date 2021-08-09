@@ -1,6 +1,6 @@
 {
 	"target": "m032Hidbootloader",
-    "microcontroller": "atsamd21e17a",
+    "microcontroller": "m032lg6ae",
     "toolchain": "arm-none-eabi",
     "c_sources": [
         "main.c",
@@ -22,7 +22,8 @@
 				"usbHid",
 				"intFlash",
 				"printf",
-				"sysCore"
+				"sysCore",
+				"uart"
         	]
 	    }
 	],
