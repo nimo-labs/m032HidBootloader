@@ -44,6 +44,8 @@
 #endif
 
 /* USB HID */
+#define USBD_VID        0x0416
+#define USBD_PID        0x5020
 #define USB_BUFFER_SIZE 64
 
 /* UI defn's */
