@@ -5,14 +5,6 @@
 
 void printStr(char *str)
 {
-    unsigned char i = 0;
-    char *strOrig = str;
-    // while(*str)
-    // {
-    //     i++;
-    //     *str++;
-    // }
-    // usbSend(EP_INPUT, strOrig, i);
     while(*str)
         uartTx(DEBUG_UART, *str++);
 }
