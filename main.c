@@ -70,10 +70,15 @@ void startApp(void)
     __set_PSP(msp);
 
     /* Rebase the vector table base address */
+#if defined(__NUVO_M032K)
     intFlashSetVectorPageAddr(BL_APPLICATION_ENTRY);
+#elif defined(__SAMR21) || defined(__SAMD21)
+    /* Rebase the vector table base address */
+    SCB->VTOR = ((uint32_t)BL_APPLICATION_ENTRY & SCB_VTOR_TBLOFF_Msk);
+#endif
 
     /* Load the Reset Handler address of the application */
-    application_code_entry = (void *)*(uint32_t *)(APP_START_RESET_VEC_ADDRESS);
+    application_code_entry = (void *)*(uint32_t *)(APP_START_RESET_VEC_ADDRESS)+4;
     /* Jump to user Reset Handler in the application */
     __enable_irq();
     application_code_entry();
@@ -88,7 +93,7 @@ int main(void)
 {
     uint32_t ledLastTicks;
     struct hidBlProtocolPacket_s pkt;
-    uint8_t bootSw;
+    uint16_t bootSw;
 
     GPIO_PIN_DIR(BL_LED_PORT, BL_LED_PIN, GPIO_DIR_OUT);
     GPIO_PIN_OUT(BL_LED_PORT, BL_LED_PIN, GPIO_OUT_HIGH);
@@ -127,6 +132,7 @@ int main(void)
     /******************************************************/
     /*Check for valid App*/
     bootSw = GPIO_PIN_READ(BL_SW_PORT, BL_SW_PIN);
+
     volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
     if((0 == bootSw))// && (0x0000DEAD != *bootMagicAddress))
@@ -151,9 +157,21 @@ int main(void)
         uartInit(DEBUG_UART, UART_BAUD_115200);
         printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
         printStr("Bootloader mode requested\r\n");
+
+        uint32_t *flashPt = BL_APPLICATION_ENTRY;
+
+        for(int j=0; j < 21; j++)
+        {
+            for(int i=0; i < 4; i++)
+            {
+                printHex(*flashPt);
+                printStr(" ");
+                flashPt++;
+            }
+            printStr("\r\n");
+        }
 #endif
     }
-    // *bootMagicAddress = 0xFFFFFFFF;
 
 #if HELPER == 1
     printStr("Version: ");
@@ -165,7 +183,7 @@ int main(void)
     //printStr("Serial number: ");
     //printHex(SYS->PDID);
 #endif
-    //usbInit();
+
     delaySetup(DELAY_BASE_MILLI_SEC);
     usbInit();
     ledLastTicks = delayGetTicks();
@@ -186,9 +204,9 @@ int main(void)
 
             if(HID_BL_PROTOCOL_WRITE_INT_FLASH == pkt.packetType)
             {
-                // printStr("Address: ");
-                // printHex(pkt.address);
-                // printStr("\r\n");
+                printStr("Address: ");
+                printHex(pkt.address);
+                printStr("\r\n");
                 /*Make sure we don't erase ourself!*/
                 if(pkt.address >= BL_APPLICATION_ENTRY)
                 {
@@ -233,19 +251,19 @@ int main(void)
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
                 /*Reset to run application*/
-                sysCoreuCReset();
+                // sysCoreuCReset();
             }
             else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType)
             {
                 uint32_t mfrId = intFlashReadCID();
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, sizeof(mfrId));
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, (unsigned char*)&mfrId, sizeof(mfrId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType)
             {
                 uint32_t partId = intFlashReadPID();
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, sizeof(partId));
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, (unsigned char*)&partId, sizeof(partId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
             }
@@ -253,7 +271,7 @@ int main(void)
             {
                 //          printStr("Get ver\r\n");
                 uint16_t version = (VER_MAJ << 8) | VER_MIN;
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, &version, sizeof(version));
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, (unsigned char*)&version, sizeof(version));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
             }
