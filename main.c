@@ -157,19 +157,6 @@ int main(void)
         uartInit(DEBUG_UART, UART_BAUD_115200);
         printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
         printStr("Bootloader mode requested\r\n");
-
-        uint32_t *flashPt = BL_APPLICATION_ENTRY;
-
-        for(int j=0; j < 21; j++)
-        {
-            for(int i=0; i < 4; i++)
-            {
-                printHex(*flashPt);
-                printStr(" ");
-                flashPt++;
-            }
-            printStr("\r\n");
-        }
 #endif
     }
 
@@ -204,9 +191,9 @@ int main(void)
 
             if(HID_BL_PROTOCOL_WRITE_INT_FLASH == pkt.packetType)
             {
-                printStr("Address: ");
-                printHex(pkt.address);
-                printStr("\r\n");
+                // printStr("Address: ");
+                // printHex(pkt.address);
+                // printStr("\r\n");
                 /*Make sure we don't erase ourself!*/
                 if(pkt.address >= BL_APPLICATION_ENTRY)
                 {
@@ -251,7 +238,7 @@ int main(void)
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
                 /*Reset to run application*/
-                // sysCoreuCReset();
+                sysCoreuCReset();
             }
             else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType)
             {
