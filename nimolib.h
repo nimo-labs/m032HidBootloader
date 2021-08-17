@@ -21,7 +21,7 @@
 /*Uart config */
 #define PRINTF_BUFF_SIZE 0
 #define DEBUG_UART UART_CHAN0
-#define PRINTF_UART PRINTF_USB_HID
+
 #if defined(__NUVO_M032K)
 #define UART_CHAN0 0
 #define UART_CHAN0_SERCOM 0
