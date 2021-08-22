@@ -16,10 +16,17 @@ jobs:
       with:
         path: 'bootloader'
         fetch-depth: 0
+<<<<<<< HEAD
     # - name: umake
     #   run: |
     #     cd bootloader
     #     #../umake.py
+=======
+    - name: umake
+      run: |
+        cd bootloader
+        #../umake.py
+>>>>>>> 9251ad31cd24a13184739a602693603bb0639225
 
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1
