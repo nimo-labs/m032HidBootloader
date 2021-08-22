@@ -19,7 +19,9 @@ jobs:
     - name: umake
       run: |
         cd bootloader
-        ../umake.py
+        #../umake.py
+        echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
+
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1.0.2
       with:
