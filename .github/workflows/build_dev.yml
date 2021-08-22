@@ -22,6 +22,16 @@ jobs:
         #../umake.py
         echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
 
+#update version number
+    - name: bump version
+      run: |
+        cd bootloader
+        ls -l
+        cat version.h
+        awk -f bumpver.awk version.h
+        cat version.h
+        mv version.h ../
+
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1
       env: 
@@ -31,3 +41,11 @@ jobs:
     - run: |
         cd bootloader
         ./buildall.sh
+
+
+    - name: commit version
+      uses: test-room-7/action-update-file@v1
+      with:
+          file-path: version.h
+          commit-msg: Update version number
+          github-token: ${{ secrets.GITHUB_TOKEN }}
