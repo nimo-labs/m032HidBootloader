@@ -21,7 +21,7 @@ jobs:
         cd bootloader
         ../umake.py
     #- name: Compile
-    - uses: fiam/arm-none-eabi-gcc@v1
+    - uses: fiam/arm-none-eabi-gcc@v1.0.2
       with:
         release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
     - run: |
