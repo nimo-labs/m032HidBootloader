@@ -1,4 +1,4 @@
-name: Master build
+name: Production build
 
 on:
   push:
