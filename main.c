@@ -26,7 +26,7 @@
 /*Nimolib books*/
 #include <gpio.h>
 #include <delay.h>
-//#include <uart.h>
+#include <uart.h>
 #include <simpleHid.h>
 #include <intFlash.h>
 
@@ -48,73 +48,73 @@ bool usbDirty = FALSE;
 extern uint32_t BOOT_MAGIC_ADDRESS;
 
 /* Helper functions */
-// void printStr(char *str)
-// {
-//     unsigned char i = 0;
-//     char *strOrig = str;
-//     // while(*str)
-//     // {
-//     //     i++;
-//     //     *str++;
-//     // }
-//     // usbSend(EP_INPUT, strOrig, i);
-//     while(*str)
-//         uartTx(DEBUG_UART, *str++);
-// }
+void printStr(char *str)
+{
+    unsigned char i = 0;
+    char *strOrig = str;
+    // while(*str)
+    // {
+    //     i++;
+    //     *str++;
+    // }
+    // usbSend(EP_INPUT, strOrig, i);
+    while(*str)
+        uartTx(DEBUG_UART, *str++);
+}
 
-// void printHex(uint32_t val)
-// {
-//     uint8_t hex[] = "0123456789ABCDEF";
-//     printStr("0x");
-//     uartTx(DEBUG_UART, hex[(val>>28) & 0xf]);
-//     uartTx(DEBUG_UART, hex[(val>>24) & 0xf]);
-//     uartTx(DEBUG_UART, hex[(val>>20) & 0xf]);
-//     uartTx(DEBUG_UART, hex[(val>>16) & 0xf]);
-//     uartTx(DEBUG_UART, hex[(val>>12) & 0xf]);
-//     uartTx(DEBUG_UART, hex[(val>>8) & 0xf]);
-//     uartTx(DEBUG_UART, hex[(val>>4) & 0xf]);
-//     uartTx(DEBUG_UART, hex[(val) & 0xf]);
-// }
+void printHex(uint32_t val)
+{
+    uint8_t hex[] = "0123456789ABCDEF";
+    printStr("0x");
+    uartTx(DEBUG_UART, hex[(val>>28) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>24) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>20) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>16) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>12) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>8) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val>>4) & 0xf]);
+    uartTx(DEBUG_UART, hex[(val) & 0xf]);
+}
 
-// void printDec(uint8_t val)
-// {
-//     uint8_t reg[3];
-//     if(val > 99)
-//     {
-//         reg[0] = (val / 100) + 0x30;
-//         val -= 100;
-//     }
-//     else
-//     {
-//         reg[0] = 0;
-//     }
-//     if(val > 9)
-//     {
-//         reg[1] = (val / 10) + 0x30;
-//         val -= 10;
-//     }
-//     else
-//     {
-//         reg[1] = 0;
-//     }
-//     if(val > 0)
-//     {
-//         reg[2] = val  + 0x30;
-//         val -= 10;
-//     }
-//     else
-//     {
-//         reg[2] = 0;
-//     }
+void printDec(uint8_t val)
+{
+    uint8_t reg[3];
+    if(val > 99)
+    {
+        reg[0] = (val / 100) + 0x30;
+        val -= 100;
+    }
+    else
+    {
+        reg[0] = 0;
+    }
+    if(val > 9)
+    {
+        reg[1] = (val / 10) + 0x30;
+        val -= 10;
+    }
+    else
+    {
+        reg[1] = 0;
+    }
+    if(val > 0)
+    {
+        reg[2] = val  + 0x30;
+        val -= 10;
+    }
+    else
+    {
+        reg[2] = 0;
+    }
 
-//     for(uint8_t i=0; i < 3; i++)
-//     {
-//         if(reg[i] > 0)
-//             uartTx(DEBUG_UART, reg[i]);
-//         else if(2 == i)
-//             uartTx(DEBUG_UART, 0x30);
-//     }
-// }
+    for(uint8_t i=0; i < 3; i++)
+    {
+        if(reg[i] > 0)
+            uartTx(DEBUG_UART, reg[i]);
+        else if(2 == i)
+            uartTx(DEBUG_UART, 0x30);
+    }
+}
 
 void startApp(void)
 {
@@ -146,13 +146,10 @@ int main(void)
 {
     uint32_t ledLastTicks;
     struct hidBlProtocolPacket_s pkt;
-    uint8_t bootSw;
+    uint32_t bootSw;
 
     GPIO_PIN_DIR(GPIO_PORTC, 14, GPIO_DIR_OUT);
     GPIO_PIN_OUT(GPIO_PORTC, 14, GPIO_OUT_HIGH);
-
-    GPIO_PIN_DIR(GPIO_PORTC, 5, GPIO_DIR_OUT);
-    GPIO_PIN_OUT(GPIO_PORTC, 5, GPIO_OUT_LOW);
 
     GPIO_PIN_DIR(GPIO_PORTB, 14, GPIO_DIR_IN);
 
@@ -164,9 +161,9 @@ int main(void)
     uint32_t flashDataWord = intFlashRead(FMC_CONFIG_BASE);
     if(0x02 != ((flashDataWord & 0xC0) >> 6))
     {
-        // uartInit(DEBUG_UART, UART_BAUD_115200);
-        // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-        // printStr("Updating config\r\n");
+        uartInit(DEBUG_UART, UART_BAUD_115200);
+        printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+        printStr("Updating config\r\n");
         delaySetup(DELAY_BASE_MILLI_SEC);
         FMC_ENABLE_CFG_UPDATE();
         uint32_t flashDataWord = 0xffffffbf;
@@ -182,7 +179,7 @@ int main(void)
     bootSw = GPIO_PIN_READ(GPIO_PORTB,14);
     volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
-    if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
+    if((1 == bootSw) && (0x0000DEAD != *bootMagicAddress))
     {
         uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
         if (0xffffffff != msp)
@@ -191,16 +188,16 @@ int main(void)
         }
         else
         {
-            // uartInit(DEBUG_UART, UART_BAUD_115200);
-            // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-            // printStr("No application found\r\n");
+            uartInit(DEBUG_UART, UART_BAUD_115200);
+            printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+            printStr("No application found\r\n");
         }
     }
     else
     {
-        // uartInit(DEBUG_UART, UART_BAUD_115200);
-        // printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
-        // printStr("Bootloader mode requested\r\n");
+        uartInit(DEBUG_UART, UART_BAUD_115200);
+        printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
+        printStr("Bootloader mode requested\r\n");
     }
     *bootMagicAddress = 0xFFFFFFFF;
 
@@ -256,13 +253,13 @@ int main(void)
                     // printStr("\r\n");
                     hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                    usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                    usbSend( usbPkt, USB_BUFFER_SIZE);
                 }
                 else
                 {
                     hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                    usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                    usbSend( usbPkt, USB_BUFFER_SIZE);
                 }
             }
             else if(HID_BL_PROTOCOL_ERASE_INT_FLASH == pkt.packetType)
@@ -273,13 +270,13 @@ int main(void)
                 }
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_RUN_INT == pkt.packetType) /* Jump to application*/
             {
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
                 /*Reset to run application*/
                 SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
             }
@@ -288,14 +285,14 @@ int main(void)
                 uint32_t mfrId = intFlashReadCID();
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, sizeof(mfrId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType)
             {
                 uint32_t partId = intFlashReadPID();
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, sizeof(partId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_GET_BL_VER == pkt.packetType)
             {
@@ -303,13 +300,13 @@ int main(void)
                 uint16_t version = (VER_MAJ << 8) | VER_MIN;
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, &version, sizeof(version));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else /*Send NAK due to unknown command */
             {
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend(EP_INPUT, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             usbDirty = 0;
         }

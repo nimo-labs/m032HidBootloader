@@ -5,9 +5,7 @@
     "c_sources": [
         "main.c",
 		"hidBlProtocol.c",
-		"./usbStrings.c",
-		"./umake/nimolib/uC/m032/_syscalls.c",
-		"./umake/nimolib/uC/m032/support.c"
+		"./usbStrings.c"
     ],
     "includes": [
         "./"
@@ -23,7 +21,8 @@
 				"delay",
 				"usbHid",
 				"intFlash",
-				"printf"
+				"printf",
+				"uart"
         	]
 	    }
 	],

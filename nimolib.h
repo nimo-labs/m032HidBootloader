@@ -25,6 +25,8 @@
 #define PRINTF_BUFF_SIZE 0
 #define DEBUG_UART UART_CHAN0
 #define PRINTF_UART PRINTF_USB_HID
+
+#define UART_0_USE_PF2_3
 #define UART_CHAN0 0
 #define UART_CHAN0_SERCOM 0
 #define UART_CHAN0_FIFO_LEN 10
@@ -32,3 +34,5 @@
 /* USB HID */
 #define USB_BUFFER_SIZE 64
 
+#define USB_VID 0x0416
+#define USB_PID 0x5020
