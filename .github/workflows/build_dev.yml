@@ -26,4 +26,4 @@ jobs:
         release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
     - run: |
         cd bootloader
-        ../buildall.sh
+        ./buildall.sh
