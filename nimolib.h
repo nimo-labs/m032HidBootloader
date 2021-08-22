@@ -15,14 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "hal.h"
+
 /*Main processor clock */
 #define UP_CLK 48000000
+
+
 
 /*Uart config */
 #define PRINTF_BUFF_SIZE 0
 #define DEBUG_UART UART_CHAN0
 
 #if defined(__NUVO_M032K)
+#define UART_0_USE_PF2_3
 #define UART_CHAN0 0
 #define UART_CHAN0_SERCOM 0
 #define UART_CHAN0_FIFO_LEN 10
@@ -47,3 +52,7 @@
 
 #define USB_VID 0x0416
 #define USB_PID 0x5020
+
+#if defined(__SAMR21) || defined(__SAMD21)
+#define PERHIP_CLK_GEN 0
+#endif
