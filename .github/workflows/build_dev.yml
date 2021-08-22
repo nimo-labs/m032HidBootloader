@@ -26,11 +26,11 @@ jobs:
     - name: bump version
       run: |
         cd bootloader
-        ls -l
         cat version.h
         awk -f bumpver.awk version.h
         cat version.h
         mv version.h ../
+        ls -l
 
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1
