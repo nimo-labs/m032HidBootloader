@@ -16,8 +16,10 @@ jobs:
       with:
         path: 'bootloader'
         fetch-depth: 0
-    # - name: umake
-    #   run: |
+    - name: umake
+       run: |
+       # enable workflow command processing
+        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
     #     cd bootloader
     #     #../umake.py
 

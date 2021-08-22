@@ -15,10 +15,10 @@ jobs:
     - uses: actions/checkout@v2
       with:
         path: 'bootloader'
-    # - name: umake
-    #   run: |
-    #     cd bootloader
-    #     #../umake.py
+    - name: umake
+       run: |
+       # enable workflow command processing
+        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1
       with:
