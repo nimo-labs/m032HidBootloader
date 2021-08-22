@@ -16,14 +16,13 @@ jobs:
       with:
         path: 'bootloader'
         fetch-depth: 0
-    - name: umake
-      run: |
-        cd bootloader
-        #../umake.py
-        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+    # - name: umake
+    #   run: |
+    #     cd bootloader
+    #     #../umake.py
 
     #- name: Compile
-    - uses: fiam/arm-none-eabi-gcc@v1.0.2
+    - uses: fiam/arm-none-eabi-gcc@v1
       env: 
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       with:
