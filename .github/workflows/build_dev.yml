@@ -29,7 +29,6 @@ jobs:
         cat version.h
         awk -f bumpver.awk version.h
         cat version.h
-        mv version.h ../
         ls -l
 
     #- name: Compile
