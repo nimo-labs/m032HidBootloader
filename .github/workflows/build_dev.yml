@@ -28,6 +28,8 @@ jobs:
         cd bootloader
         cat version.h
         awk -f bumpver.awk version.h
+        # Copy required to place file in correct place for later commit
+        cp version.h ../
         cat version.h
 
     #- name: Compile
@@ -44,6 +46,7 @@ jobs:
     - name: commit version
       uses: test-room-7/action-update-file@v1
       with:
-          file-path: bootloader/version.h
+          file-path: version.h
           commit-msg: Update version number
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          branch: dev
