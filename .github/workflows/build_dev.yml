@@ -17,11 +17,10 @@ jobs:
         path: 'bootloader'
         fetch-depth: 0
     - name: umake
-       run: |
-       # enable workflow command processing
+      run: |
+        #cd bootloader
+        #../umake.py
         echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
-    #     cd bootloader
-    #     #../umake.py
 
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1
