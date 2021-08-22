@@ -17,7 +17,12 @@
 
 /*Standard libs*/
 #include "stdbool.h"
+
+#if defined(__SAMR21) || defined(__SAMD21)
+#include <sam.h>
+#else
 #include "NuMicro.h"
+#endif
 #include "string.h"
 
 /*Nimolib configuration*/
@@ -26,12 +31,22 @@
 /*Nimolib books*/
 #include <gpio.h>
 #include <delay.h>
+<<<<<<< HEAD
 #include <uart.h>
+=======
+    >>>>>>> 1ffd8372dc1a26696fd4153a757e9acd5ec5d2d0
 #include <simpleHid.h>
 #include <intFlash.h>
+#include <sysCore.h>
+#if defined(__SAMR21) || defined(__SAMD21)
+#include <osc.h>
+#endif
+
+#define HELPER 1
+#include "helper.h"
 
 
-extern void SYS_UnlockReg(void);
+    extern void SYS_UnlockReg(void);
 
 /*Local project modules*/
 #include "hidBlProtocol.h"
@@ -47,6 +62,7 @@ bool usbDirty = FALSE;
 
 extern uint32_t BOOT_MAGIC_ADDRESS;
 
+<<<<<<< HEAD
 /* Helper functions */
 void printStr(char *str)
 {
@@ -116,7 +132,9 @@ void printDec(uint8_t val)
     }
 }
 
-void startApp(void)
+=======
+    >>>>>>> 1ffd8372dc1a26696fd4153a757e9acd5ec5d2d0
+    void startApp(void)
 {
     /* Pointer to the Application Section */
     void (*application_code_entry)(void);
@@ -128,10 +146,15 @@ void startApp(void)
     __set_PSP(msp);
 
     /* Rebase the vector table base address */
+#if defined(__NUVO_M032K)
     intFlashSetVectorPageAddr(BL_APPLICATION_ENTRY);
+#elif defined(__SAMR21) || defined(__SAMD21)
+    /* Rebase the vector table base address */
+    SCB->VTOR = ((uint32_t)BL_APPLICATION_ENTRY & SCB_VTOR_TBLOFF_Msk);
+#endif
 
     /* Load the Reset Handler address of the application */
-    application_code_entry = (void *)*(uint32_t *)(APP_START_RESET_VEC_ADDRESS);
+    application_code_entry = (void *)*(uint32_t *)(APP_START_RESET_VEC_ADDRESS)+4;
     /* Jump to user Reset Handler in the application */
     __enable_irq();
     application_code_entry();
@@ -146,24 +169,31 @@ int main(void)
 {
     uint32_t ledLastTicks;
     struct hidBlProtocolPacket_s pkt;
+
     uint32_t bootSw;
+    GPIO_PIN_DIR(BL_LED_PORT, BL_LED_PIN, GPIO_DIR_OUT);
+    GPIO_PIN_OUT(BL_LED_PORT, BL_LED_PIN, GPIO_OUT_HIGH);
+    GPIO_PIN_DIR(BL_SW_PORT, BL_SW_PIN, GPIO_DIR_IN);
 
-    GPIO_PIN_DIR(GPIO_PORTC, 14, GPIO_DIR_OUT);
-    GPIO_PIN_OUT(GPIO_PORTC, 14, GPIO_OUT_HIGH);
 
-    GPIO_PIN_DIR(GPIO_PORTB, 14, GPIO_DIR_IN);
+#if defined(__SAMR21) || defined(__SAMD21)
+    oscSet(OSC_48DFLL);
+#endif
 
+    /*Nuvoton specific flash bank switching*/
+#if defined(__NUVO_M032K)
     SYS_UnlockReg();
     intFlashOpen();
     FMC_ENABLE_AP_UPDATE();
-
     /*Read config first, if not set then setup and issue uC reboot*/
     uint32_t flashDataWord = intFlashRead(FMC_CONFIG_BASE);
     if(0x02 != ((flashDataWord & 0xC0) >> 6))
     {
+#if HELPER == 1
         uartInit(DEBUG_UART, UART_BAUD_115200);
         printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
         printStr("Updating config\r\n");
+#endif
         delaySetup(DELAY_BASE_MILLI_SEC);
         FMC_ENABLE_CFG_UPDATE();
         uint32_t flashDataWord = 0xffffffbf;
@@ -173,13 +203,14 @@ int main(void)
         delayMs(1000);
         SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
     }
-
-
+#endif
+    /******************************************************/
     /*Check for valid App*/
-    bootSw = GPIO_PIN_READ(GPIO_PORTB,14);
+    bootSw = GPIO_PIN_READ(BL_SW_PORT, BL_SW_PIN);
+
     volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
-    if((1 == bootSw) && (0x0000DEAD != *bootMagicAddress))
+    if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
     {
         uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
         if (0xffffffff != msp)
@@ -188,29 +219,33 @@ int main(void)
         }
         else
         {
+#if HELPER == 1
             uartInit(DEBUG_UART, UART_BAUD_115200);
             printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
             printStr("No application found\r\n");
+#endif
         }
     }
     else
     {
+#if HELPER == 1
         uartInit(DEBUG_UART, UART_BAUD_115200);
         printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
         printStr("Bootloader mode requested\r\n");
+#endif
     }
-    *bootMagicAddress = 0xFFFFFFFF;
 
-    // printStr("Version: ");
-    // printDec(VER_MAJ);
-    // printStr(".");
-    // printDec(VER_MIN);
-    // printStr("\r\n");
+#if HELPER == 1
+    printStr("Version: ");
+    printDec(VER_MAJ);
+    printStr(".");
+    printDec(VER_MIN);
+    printStr("\r\n");
 
-    // printStr("Serial number: ");
-    // printHex(SYS->PDID);
+    //printStr("Serial number: ");
+    //printHex(SYS->PDID);
+#endif
 
-    //usbInit();
     delaySetup(DELAY_BASE_MILLI_SEC);
     usbInit();
     ledLastTicks = delayGetTicks();
@@ -220,7 +255,7 @@ int main(void)
         if(delayMillis(ledLastTicks, 500))
         {
             ledLastTicks = delayGetTicks();
-            GPIO_PIN_TGL(GPIO_PORTC, 14);
+            GPIO_PIN_TGL(BL_LED_PORT, BL_LED_PIN);
         }
 
         if(usbDirty)
@@ -278,19 +313,19 @@ int main(void)
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
                 /*Reset to run application*/
-                SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
+                sysCoreuCReset();
             }
             else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType)
             {
                 uint32_t mfrId = intFlashReadCID();
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, &mfrId, sizeof(mfrId));
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, (unsigned char*)&mfrId, sizeof(mfrId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
             }
             else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType)
             {
                 uint32_t partId = intFlashReadPID();
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, &partId, sizeof(partId));
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, (unsigned char*)&partId, sizeof(partId));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
             }
@@ -298,7 +333,7 @@ int main(void)
             {
                 //          printStr("Get ver\r\n");
                 uint16_t version = (VER_MAJ << 8) | VER_MIN;
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, &version, sizeof(version));
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, (unsigned char*)&version, sizeof(version));
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
             }
@@ -310,7 +345,10 @@ int main(void)
             }
             usbDirty = 0;
         }
-    }
+#if defined(__SAMR21) || defined(__SAMD21)
+        usbTask();
+#endif
+    } /*Maine while loop */
 }
 
 void usbHidProcess(uint8_t *req)
