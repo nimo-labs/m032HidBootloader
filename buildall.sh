@@ -10,6 +10,7 @@ do
 	if [ $? -eq 0 ]; then
     	echo Build of $f passed
 		rm umakefile
+		cp build/*.hex ../
 	else
     	echo build of $f failed
 		rm umakefile
@@ -18,4 +19,5 @@ do
 	echo -------------------
 	echo All builds completed successfully
 	echo -------------------
+	ls -l
 done
