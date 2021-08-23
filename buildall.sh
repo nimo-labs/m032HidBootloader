@@ -20,4 +20,5 @@ do
 	echo All builds completed successfully
 	echo -------------------
 	ls -l
+	ls -l ../
 done
