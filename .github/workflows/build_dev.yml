@@ -16,10 +16,21 @@ jobs:
       with:
         path: 'bootloader'
         fetch-depth: 0
-    # - name: umake
-    #   run: |
-    #     cd bootloader
-    #     #../umake.py
+    - name: umake
+      run: |
+        #cd bootloader
+        #../umake.py
+        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+
+#update version number
+    - name: bump version
+      run: |
+        cd bootloader
+        cat version.h
+        awk -f bumpver.awk version.h
+        # Copy required to place file in correct place for later commit
+        cp version.h ../
+        cat version.h
 
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1
@@ -30,3 +41,23 @@ jobs:
     - run: |
         cd bootloader
         ./buildall.sh
+
+
+    - name: commit version
+      uses: test-room-7/action-update-file@v1
+      with:
+          file-path: version.h
+          commit-msg: Update version number
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          branch: dev
+
+#bump release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "development"
+        prerelease: false
+        title: "Development Build"
+        files: |
+          ./*.hex

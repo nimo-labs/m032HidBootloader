@@ -1,4 +1,4 @@
-name: Master build
+name: Production build
 
 on:
   push:
@@ -15,10 +15,12 @@ jobs:
     - uses: actions/checkout@v2
       with:
         path: 'bootloader'
-    # - name: umake
-    #   run: |
-    #     cd bootloader
-    #     #../umake.py
+    - name: umake
+      run: |
+        #cd bootloader
+        #../umake.py
+        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+        
     #- name: Compile
     - uses: fiam/arm-none-eabi-gcc@v1
       with:
@@ -26,3 +28,14 @@ jobs:
     - run: |
         cd bootloader
         ./buildall.sh
+
+#bump release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "production"
+        prerelease: false
+        title: "Production Build"
+        files: |
+          ./*.hex
