@@ -167,8 +167,14 @@ int main(void)
     printDec(VER_MIN);
     printStr("\r\n");
 
-    //printStr("Serial number: ");
-    //printHex(SYS->PDID);
+#if defined(__NUVO_M032K)
+    printStr("Serial number: ");
+    printHex(SYS->PDID);
+#endif
+#endif
+
+#if defined(EXT_FLASH)
+    printStr("\r\next flash enabled\r\n");
 #endif
 
     delaySetup(DELAY_BASE_MILLI_SEC);
