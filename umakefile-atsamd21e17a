@@ -1,5 +1,5 @@
 {
-	"target": "m032Hidbootloader",
+	"target": "atsamd21e17a_Hidbootloader",
     "microcontroller": "atsamd21e17a",
     "toolchain": "arm-none-eabi",
     "c_sources": [
