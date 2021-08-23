@@ -28,3 +28,14 @@ jobs:
     - run: |
         cd bootloader
         ./buildall.sh
+
+#bump release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "production"
+        prerelease: false
+        title: "Production Build"
+        files: |
+          ./*.hex
