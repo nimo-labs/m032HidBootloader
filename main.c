@@ -39,6 +39,11 @@
 #include <osc.h>
 #endif
 
+#if defined(EXT_FLASH)
+#include <spi.h>
+#include <spiDataFlash.h>
+#endif
+
 #define HELPER 1
 #include "helper.h"
 
@@ -173,11 +178,15 @@ int main(void)
 #endif
 #endif
 
+    delaySetup(DELAY_BASE_MILLI_SEC);
+
 #if defined(EXT_FLASH)
-    printStr("\r\next flash enabled\r\n");
+    spiInit(SPI_CHAN0);
+    spiDataFlashInit(0);
 #endif
 
-    delaySetup(DELAY_BASE_MILLI_SEC);
+
+
     usbInit();
     ledLastTicks = delayGetTicks();
 
@@ -268,6 +277,62 @@ int main(void)
                 hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
             }
+#if defined(EXT_FLASH)
+            else if(HID_BL_PROTOCOL_ERASE_EXT_FLASH == pkt.packetType)
+            {
+                spiDataFlashChipErase(0);
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
+            }
+            else if(HID_BL_PROTOCOL_WRITE_EXT_FLASH == pkt.packetType)
+            {
+                // printStr("Address: ");
+                // printHex(pkt.address);
+                // printStr("\r\n");
+                /*Make sure we don't overwrite ourself!*/
+                if(pkt.address >= BL_APPLICATION_ENTRY)
+                {
+                    for(int i=0; i < pkt.dataLen; i++)
+                    {
+                        //dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
+                        spiDataFlashPageWrite(0, pkt.address - BL_APPLICATION_ENTRY, pkt.data[i], 1);
+                        //intFlashWrite(pkt.address+(i), dataWord);
+                        // printHex(dataWord);
+                        // printStr(" ");
+                    }
+                    // printStr("\r\n");
+                    hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
+                    hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                    usbSend( usbPkt, USB_BUFFER_SIZE);
+                }
+                else
+                {
+                    hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
+                    hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                    usbSend( usbPkt, USB_BUFFER_SIZE);
+                }
+            }
+            else if(HID_BL_PROTOCOL_COPY_EXT_TO_INT == pkt.packetType)
+            {
+                extern uint32_t APP_INT_FLASH_START;
+                extern uint32_t APP_INT_FLASH_LENGTH;
+
+                uint32_t *appIntFlashStart = (uint32_t*)&APP_INT_FLASH_START;
+                uint32_t *appIntFlashLength = (uint32_t*)&APP_INT_FLASH_LENGTH;
+
+
+                for(volatile uint32_t i= 0; i < appIntFlashLength; i+=4)
+                {
+                    uint32_t dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
+                    intFlashWrite(pkt.address+(i+appIntFlashStart), dataWord);
+                }
+
+                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
+                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
+                usbSend( usbPkt, USB_BUFFER_SIZE);
+            }
+#endif
             else /*Send NAK due to unknown command */
             {
                 hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
