@@ -1,5 +1,5 @@
 {
-	"target": "mm032lg6ae_Hidbootloader",
+	"target": "m032lg6ae_Hidbootloader",
     "microcontroller": "m032lg6ae",
     "toolchain": "arm-none-eabi",
     "c_sources": [
