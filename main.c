@@ -57,9 +57,6 @@ extern void SYS_UnlockReg(void);
 unsigned char usbPkt[USB_BUFFER_SIZE];
 bool usbDirty = FALSE;
 
-//#define BL_APPLICATION_ENTRY 0x3000
-//#define APP_START_RESET_VEC_ADDRESS (BL_APPLICATION_ENTRY + (uint32_t)0x00000004)
-
 extern uint32_t APP_INT_FLASH_START;
 extern uint32_t APP_INT_FLASH_LENGTH;
 
@@ -89,7 +86,12 @@ void startApp(void)
 #endif
 
     /* Load the Reset Handler address of the application */
-    application_code_entry = (void *)*(uint32_t *)(appIntFlashStart);
+
+    /*The following two lines must not be combined */
+    uint32_t resetVecAddr = (uint32_t*)&APP_INT_FLASH_START;
+    resetVecAddr += 4;
+    /**************************/
+    application_code_entry = (void *)*(uint32_t *)(resetVecAddr);
     /* Jump to user Reset Handler in the application */
     __enable_irq();
     application_code_entry();
@@ -190,8 +192,6 @@ int main(void)
     spiInit(SPI_CHAN0);
     spiDataFlashInit(0);
 #endif
-
-
 
     usbInit();
     ledLastTicks = delayGetTicks();
