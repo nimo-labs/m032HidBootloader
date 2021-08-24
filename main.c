@@ -57,18 +57,23 @@ extern void SYS_UnlockReg(void);
 unsigned char usbPkt[USB_BUFFER_SIZE];
 bool usbDirty = FALSE;
 
-#define BL_APPLICATION_ENTRY 0x3000
-#define APP_START_RESET_VEC_ADDRESS (BL_APPLICATION_ENTRY + (uint32_t)0x00000004)
+//#define BL_APPLICATION_ENTRY 0x3000
+//#define APP_START_RESET_VEC_ADDRESS (BL_APPLICATION_ENTRY + (uint32_t)0x00000004)
 
-//#define BOOT_MAGIC_VALUE extern (*((volatile uint32_t *) &BOOT_MAGIC_ADDRESS))
+extern uint32_t APP_INT_FLASH_START;
+extern uint32_t APP_INT_FLASH_LENGTH;
+
+const uint32_t *appIntFlashStart = (uint32_t*)&APP_INT_FLASH_START;
+const uint32_t *appIntFlashLength = (uint32_t*)&APP_INT_FLASH_LENGTH;
 
 extern uint32_t BOOT_MAGIC_ADDRESS;
+volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
 void startApp(void)
 {
     /* Pointer to the Application Section */
     void (*application_code_entry)(void);
-    uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
+    uint32_t msp = *(uint32_t *)(appIntFlashStart);
     __disable_irq();
 
     /* Rebase the Stack Pointer */
@@ -77,14 +82,14 @@ void startApp(void)
 
     /* Rebase the vector table base address */
 #if defined(__NUVO_M032K)
-    intFlashSetVectorPageAddr(BL_APPLICATION_ENTRY);
+    intFlashSetVectorPageAddr(appIntFlashStart);
 #elif defined(__SAMR21) || defined(__SAMD21)
     /* Rebase the vector table base address */
     SCB->VTOR = ((uint32_t)BL_APPLICATION_ENTRY & SCB_VTOR_TBLOFF_Msk);
 #endif
 
     /* Load the Reset Handler address of the application */
-    application_code_entry = (void *)*(uint32_t *)(APP_START_RESET_VEC_ADDRESS)+4;
+    application_code_entry = (void *)*(uint32_t *)(appIntFlashStart);
     /* Jump to user Reset Handler in the application */
     __enable_irq();
     application_code_entry();
@@ -138,11 +143,11 @@ int main(void)
     /*Check for valid App*/
     bootSw = GPIO_PIN_READ(BL_SW_PORT, BL_SW_PIN);
 
-    volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
+    uint32_t msp = *(uint32_t *)(appIntFlashStart);
 
     if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
     {
-        uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
+
         if (0xffffffff != msp)
         {
             startApp();
@@ -153,6 +158,7 @@ int main(void)
             uartInit(DEBUG_UART, UART_BAUD_115200);
             printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
             printStr("No application found\r\n");
+            printHex(msp);
 #endif
         }
     }
@@ -210,7 +216,7 @@ int main(void)
                 // printHex(pkt.address);
                 // printStr("\r\n");
                 /*Make sure we don't erase ourself!*/
-                if(pkt.address >= BL_APPLICATION_ENTRY)
+                if(pkt.address >= appIntFlashStart)
                 {
                     if(0==(pkt.address % INT_FLASH_PAGE_SIZE))
                     {
@@ -239,7 +245,7 @@ int main(void)
             }
             else if(HID_BL_PROTOCOL_ERASE_INT_FLASH == pkt.packetType)
             {
-                for(uint32_t i=BL_APPLICATION_ENTRY; i < 0x40000; i+=INT_FLASH_PAGE_SIZE)
+                for(uint32_t i=appIntFlashStart; i < 0x40000; i+=INT_FLASH_PAGE_SIZE)
                 {
                     intFlashErase(i);
                 }
@@ -287,21 +293,21 @@ int main(void)
             }
             else if(HID_BL_PROTOCOL_WRITE_EXT_FLASH == pkt.packetType)
             {
-                // printStr("Address: ");
-                // printHex(pkt.address);
-                // printStr("\r\n");
+                printStr("Address: ");
+                printHex(pkt.address);
+                printStr("\r\n");
                 /*Make sure we don't overwrite ourself!*/
-                if(pkt.address >= BL_APPLICATION_ENTRY)
+                if(pkt.address >= 0x400)
                 {
                     for(int i=0; i < pkt.dataLen; i++)
                     {
                         //dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
-                        spiDataFlashPageWrite(0, pkt.address - BL_APPLICATION_ENTRY, pkt.data[i], 1);
+                        //spiDataFlashPageWrite(0, pkt.address - BL_APPLICATION_ENTRY, pkt.data[i], 1);
                         //intFlashWrite(pkt.address+(i), dataWord);
-                        // printHex(dataWord);
-                        // printStr(" ");
+                        printHex(dataWord);
+                        printStr(" ");
                     }
-                    // printStr("\r\n");
+                    printStr("\r\n");
                     hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
                     hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
                     usbSend( usbPkt, USB_BUFFER_SIZE);
@@ -315,13 +321,6 @@ int main(void)
             }
             else if(HID_BL_PROTOCOL_COPY_EXT_TO_INT == pkt.packetType)
             {
-                extern uint32_t APP_INT_FLASH_START;
-                extern uint32_t APP_INT_FLASH_LENGTH;
-
-                uint32_t *appIntFlashStart = (uint32_t*)&APP_INT_FLASH_START;
-                uint32_t *appIntFlashLength = (uint32_t*)&APP_INT_FLASH_LENGTH;
-
-
                 for(volatile uint32_t i= 0; i < appIntFlashLength; i+=4)
                 {
                     uint32_t dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
