@@ -82,7 +82,7 @@ void startApp(void)
     intFlashSetVectorPageAddr(appIntFlashStart);
 #elif defined(__SAMR21) || defined(__SAMD21)
     /* Rebase the vector table base address */
-    SCB->VTOR = ((uint32_t)BL_APPLICATION_ENTRY & SCB_VTOR_TBLOFF_Msk);
+    SCB->VTOR = ((uint32_t)appIntFlashStart & SCB_VTOR_TBLOFF_Msk);
 #endif
 
     /* Load the Reset Handler address of the application */
