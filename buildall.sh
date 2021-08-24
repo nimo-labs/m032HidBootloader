@@ -8,7 +8,9 @@ do
 	../umake.py
 	make
 	if [ $? -eq 0 ]; then
+		echo -------------------
     	echo Build of $f passed
+		echo -------------------
 		rm umakefile
 		cp build/*.hex ../
 	else
@@ -16,7 +18,7 @@ do
 		rm umakefile
 		exit 1
 	fi
-	echo -------------------
-	echo All builds completed successfully
-	echo -------------------
 done
+echo -------------------
+echo All builds completed successfully
+echo -------------------
