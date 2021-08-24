@@ -3,6 +3,7 @@ name: Feature build
 on:
   push:
     branches:
+      - *
       - !dev 
       - !master
 
