@@ -1,0 +1,34 @@
+name: Feature build
+
+on:
+  push:
+    branches:
+      - !dev 
+      - !master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: 'nimo-labs/umake'
+    - uses: actions/checkout@v2
+      with:
+        path: 'bootloader'
+        fetch-depth: 0
+    - name: umake
+      run: |
+        #cd bootloader
+        #../umake.py
+        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+
+    #- name: Compile
+    - uses: fiam/arm-none-eabi-gcc@v1
+      env: 
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+      with:
+        release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
+    - run: |
+        cd bootloader
+        ./buildall.sh
