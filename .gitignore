@@ -37,3 +37,4 @@ build/*
 umake/*
 Makefile
 umakefile
+*.hex
