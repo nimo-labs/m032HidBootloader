@@ -5,7 +5,9 @@
     "c_sources": [
         "main.c",
 		"hidBlProtocol.c",
-		"./usbStrings.c"
+		"./usbStrings.c",
+		"commands.c",
+		"helper.c"
     ],
     "includes": [
         "./"
