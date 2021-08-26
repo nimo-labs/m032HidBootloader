@@ -24,6 +24,7 @@
 #include <spiDataFlash.h>
 #endif
 
+#include <string.h>
 
 #include "hidBlProtocol.h"
 #include "version.h"
