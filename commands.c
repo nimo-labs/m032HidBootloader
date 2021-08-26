@@ -19,6 +19,7 @@
 #include <simpleHid.h>
 #include <intFlash.h>
 #include <sysCore.h>
+#include <delay.h>
 #if defined(EXT_FLASH)
 #include <spi.h>
 #include <spiDataFlash.h>
