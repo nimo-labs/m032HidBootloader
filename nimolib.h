@@ -56,3 +56,5 @@
 #if defined(__SAMR21) || defined(__SAMD21)
 #define PERHIP_CLK_GEN 0
 #endif
+
+#define EXT_FLASH_APP_LOC 0x0
