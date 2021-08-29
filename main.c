@@ -80,7 +80,7 @@ void startApp(void)
 
     /* Rebase the vector table base address */
 #if defined(__NUVO_M032K)
-    intFlashSetVectorPageAddr(*appIntFlashStart);
+    intFlashSetVectorPageAddr(appIntFlashStart);
 #elif defined(__SAMR21) || defined(__SAMD21)
     /* Rebase the vector table base address */
     SCB->VTOR = ((uint32_t)appIntFlashStart & SCB_VTOR_TBLOFF_Msk);
@@ -194,7 +194,6 @@ int main(void)
     spiInit(SPI_CHAN0);
     spiDataFlashInit(0);
 #endif
-
     usbInit();
     ledLastTicks = delayGetTicks();
 
@@ -209,7 +208,7 @@ int main(void)
     for(int i=0; i < 32; i++)
         flashBuf[i] = 0;
 
-    spiDataFlashReadData(0, 0x400, flashBuf, 32);
+    spiDataFlashReadData(0, 0x0, flashBuf, 32);
 
     for(int i=0; i < 32; i++)
     {
