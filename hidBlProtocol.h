@@ -43,6 +43,7 @@
 #define HID_BL_PROTOCOL_GET_PART_ID 0x12
 #define HID_BL_PROTOCOL_SEND_MFR_ID 0x13
 #define HID_BL_PROTOCOL_SEND_PART_ID 0x14
+#define HID_BL_PROTOCOL_USB_WAIT 0x15
 /*******************************************/
 
 struct __attribute__((packed)) hidBlProtocolPacket_s
