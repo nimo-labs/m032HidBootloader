@@ -123,30 +123,21 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
         // printStr("Address: ");
         // printHex(pkt->address);
         // printStr("\r\n");
-        /*Make sure we don't overwrite ourself!*/
-        if(pkt->address >= EXT_FLASH_APP_LOC)
+        for(int i=0; i < pkt->dataLen; i++)
         {
-            for(int i=0; i < pkt->dataLen; i++)
-            {
-                spiDataFlashPageWrite(0, pkt->address+i, &pkt->data[i], 1);
-                // printHex(pkt->data[i]);
-                // printStr(" ");
-            }
-            //printStr("\r\n");
-            hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
-            hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
-            usbSend( usbPkt, USB_BUFFER_SIZE);
+            spiDataFlashPageWrite(0, pkt->address+EXT_FLASH_APP_LOC+i, &pkt->data[i], 1);
+            // printHex(pkt->data[i]);
+            // printStr(" ");
         }
-        else
-        {
-            hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
-            hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
-            usbSend( usbPkt, USB_BUFFER_SIZE);
-        }
+        //printStr("\r\n");
+        hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
+        hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
+        usbSend( usbPkt, USB_BUFFER_SIZE);
+
     }
     else if(HID_BL_PROTOCOL_COPY_EXT_TO_INT == pkt->packetType)
     {
-        printStr("Copying ext to int\r\n");
+        // printStr("Copying ext to int\r\n");
         uint8_t buf[16];
         unsigned long millis = delayGetTicks();
         for(volatile uint32_t i= 0; i < 0x3000; i+=4)
@@ -159,7 +150,7 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
             if(delayMillis(millis, 1000))
             {
                 millis = delayGetTicks();
-                printStr("Send wait\r\n");
+                //  printStr("Send wait\r\n");
                 hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_USB_WAIT, NULL, 0);
                 hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
                 usbSend( usbPkt, USB_BUFFER_SIZE);
@@ -168,7 +159,7 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
             uint32_t dataWord = (buf[3] << 24)|(buf[2] << 16)|(buf[1] << 8)|(buf[0]);
             intFlashWrite((uint32_t)(i+0x3000), dataWord);
         }
-        printStr("Done\r\n");
+        //printStr("Done\r\n");
         hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
         hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
         usbSend( usbPkt, USB_BUFFER_SIZE);
@@ -176,20 +167,20 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
     else if(HID_BL_PROTOCOL_READ_EXT_FLASH == pkt->packetType)
     {
         uint8_t buf[16];
-        printStr("Reading ext flash\r\n");
+        // printStr("Reading ext flash\r\n");
         spiDataFlashReadData(0, EXT_FLASH_APP_LOC, buf, 16);
-        printStr("Done\r\n");
+        //printStr("Done\r\n");
         // for(int i=0; i < 16; i++)
         // {
         //     printHex(buf[i]);
         //     printStr(" ");
         // }
-        printStr("\r\n");
+        // printStr("\r\n");
         delayMs(3000);
         hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
         hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
         usbSend( usbPkt, USB_BUFFER_SIZE);
-        printStr("Sent\r\n");
+        // printStr("Sent\r\n");
     }
 #endif
     else /*Send NAK due to unknown command */
