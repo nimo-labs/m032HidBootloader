@@ -179,6 +179,8 @@ int main(void)
     printDec(VER_MAJ);
     printStr(".");
     printDec(VER_MIN);
+    printStr(".");
+    printDec(VER_FORK);
     printStr("\r\n");
 
 #if defined(__NUVO_M032K)
