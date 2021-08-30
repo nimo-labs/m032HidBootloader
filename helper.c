@@ -47,7 +47,7 @@ void printDec(uint8_t val)
     if(val > 99)
     {
         reg[0] = (val / 100) + 0x30;
-        val -= 100;
+        val -= ((val /100)*100);
     }
     else
     {
@@ -56,7 +56,7 @@ void printDec(uint8_t val)
     if(val > 9)
     {
         reg[1] = (val / 10) + 0x30;
-        val -= 10;
+        val -= ((val /10)*10);
     }
     else
     {
