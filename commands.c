@@ -140,12 +140,12 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
         // printStr("Copying ext to int\r\n");
         uint8_t buf[16];
         unsigned long millis = delayGetTicks();
-        for(volatile uint32_t i= 0; i < 0x3000; i+=4)
+        for(volatile uint32_t i= 0; i < (uint32_t)appIntFlashStart; i+=4)
         {
             if(0==((uint32_t)(i+0x3000) % INT_FLASH_PAGE_SIZE))
             {
-                if(-1 == intFlashErase((uint32_t)(i+0x3000)))
-                    intFlashErase((uint32_t)(i+0x3000));
+                if(-1 == intFlashErase((uint32_t)(i+(uint32_t)appIntFlashStart)))
+                    intFlashErase((uint32_t)(i+(uint32_t)appIntFlashStart));
             }
             if(delayMillis(millis, 1000))
             {
@@ -157,7 +157,7 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
             }
             spiDataFlashReadData(0, EXT_FLASH_APP_LOC+i, buf, 4);
             uint32_t dataWord = (buf[3] << 24)|(buf[2] << 16)|(buf[1] << 8)|(buf[0]);
-            intFlashWrite((uint32_t)(i+0x3000), dataWord);
+            intFlashWrite((uint32_t)(i+(uint32_t)appIntFlashStart), dataWord);
         }
         //printStr("Done\r\n");
         hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
