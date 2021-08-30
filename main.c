@@ -197,30 +197,6 @@ int main(void)
     usbInit();
     ledLastTicks = delayGetTicks();
 
-#if defined(EXT_FLASH)
-    unsigned char flashBuf[32] = {0};
-
-    // for(int i=0; i < 32; i++)
-    //     flashBuf[i] = i;
-
-    // spiDataFlashPageWrite(0, 0x400, flashBuf, 32);
-
-    for(int i=0; i < 32; i++)
-        flashBuf[i] = 0;
-
-    spiDataFlashReadData(0, 0x0, flashBuf, 32);
-
-    for(int i=0; i < 32; i++)
-    {
-        printHex(flashBuf[i]);
-        printStr(" ");
-    }
-    printStr("\r\n");
-
-    // printStr("Erase\r\n");
-    // spiDataFlashChipErase(0);
-    // printStr("Done\r\n");
-#endif
     while(1)
     {
         if(delayMillis(ledLastTicks, 500))
