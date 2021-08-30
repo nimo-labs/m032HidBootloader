@@ -143,6 +143,7 @@ int main(void)
     } /*Main while loop */
 }
 
+#if defined(__NUVO_M032K)
 void m032FlashBankSwitch(void)
 {
     SYS_UnlockReg();
@@ -167,6 +168,7 @@ void m032FlashBankSwitch(void)
         SYS->IPRST0 = SYS_IPRST0_CHIPRST_Msk;
     }
 }
+#endif
 
 void usbHidProcess(uint8_t *req)
 {
