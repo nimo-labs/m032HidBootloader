@@ -161,7 +161,6 @@ int main(void)
             uartInit(DEBUG_UART, UART_BAUD_115200);
             printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
             printStr("No application found\r\n");
-            printHex(msp);
 #endif
         }
     }
