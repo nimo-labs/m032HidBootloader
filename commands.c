@@ -105,7 +105,7 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
     else if(HID_BL_PROTOCOL_GET_BL_VER == pkt->packetType)
     {
         //          printStr("Get ver\r\n");
-        uint16_t version = (VER_MAJ << 8) | VER_MIN;
+        uint32_t version = (VER_MAJ << 16) | (VER_MIN << 8) | VER_FORK;
         hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, (unsigned char*)&version, sizeof(version));
         hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
         usbSend( usbPkt, USB_BUFFER_SIZE);
