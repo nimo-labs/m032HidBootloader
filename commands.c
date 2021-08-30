@@ -113,10 +113,32 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
 #if defined(EXT_FLASH)
     else if(HID_BL_PROTOCOL_ERASE_EXT_FLASH == pkt->packetType)
     {
-        spiDataFlashChipErase(0);
-        hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
-        hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
-        usbSend( usbPkt, USB_BUFFER_SIZE);
+        if(0 == (EXT_FLASH_APP_LOC % 0x1000))
+        {
+            unsigned long millis = delayGetTicks();
+            for(unsigned int i=EXT_FLASH_APP_LOC; i < SPI_DATAFLASH_SIZE; i+=0x1000)
+            {
+                spiDataFlash4kErase(0, i);
+                if(delayMillis(millis, 1000))
+                {
+                    millis = delayGetTicks();
+                    //  printStr("Send wait\r\n");
+                    hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_USB_WAIT, NULL, 0);
+                    hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
+                    usbSend( usbPkt, USB_BUFFER_SIZE);
+                }
+            }
+
+            hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
+            hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
+            usbSend( usbPkt, USB_BUFFER_SIZE);
+        }
+        else
+        {
+            hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
+            hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
+            usbSend( usbPkt, USB_BUFFER_SIZE);
+        }
     }
     else if(HID_BL_PROTOCOL_WRITE_EXT_FLASH == pkt->packetType)
     {
@@ -133,7 +155,6 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
         hidBlProtocolEncodePacket(pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
         hidBlProtocolSerialisePacket(pkt, usbPkt, USB_BUFFER_SIZE);
         usbSend( usbPkt, USB_BUFFER_SIZE);
-
     }
     else if(HID_BL_PROTOCOL_COPY_EXT_TO_INT == pkt->packetType)
     {
