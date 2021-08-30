@@ -20,7 +20,7 @@
 /*Main processor clock */
 #define UP_CLK 48000000
 
-
+#define HELPER 1
 
 /*Uart config */
 #define PRINTF_BUFF_SIZE 0
@@ -56,3 +56,5 @@
 #if defined(__SAMR21) || defined(__SAMD21)
 #define PERHIP_CLK_GEN 0
 #endif
+
+#define EXT_FLASH_APP_LOC 0x0

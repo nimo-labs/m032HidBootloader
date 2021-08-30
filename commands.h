@@ -15,6 +15,4 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-void printStr(char *str);
-void printHex(uint32_t val);
-void printDec(uint8_t val);
+void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt);

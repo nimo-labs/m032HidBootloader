@@ -1,18 +1,19 @@
 #!/bin/bash
 rm umakefile
+rm *.hex
 for f in umakefile*
 do
 	echo "Processing $f..."
 	ln -s $f umakefile
-	../umake.py clean
-	../umake.py
+	umake clean
+	umake
 	make
 	if [ $? -eq 0 ]; then
 		echo -------------------
     	echo Build of $f passed
 		echo -------------------
 		rm umakefile
-		cp build/*.hex ../
+		cp build/*.hex .
 	else
     	echo build of $f failed
 		rm umakefile

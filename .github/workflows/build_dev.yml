@@ -51,6 +51,17 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: dev
 
+#bump tagged release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: ${{ env.NIMO_VERSION }}
+        prerelease: false
+        title: "Development Build"
+        files: |
+          ./*.hex
+
 #bump release if successful
 
     - uses: "marvinpinto/action-automatic-releases@latest"

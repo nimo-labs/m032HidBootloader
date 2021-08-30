@@ -39,31 +39,39 @@
 #include <osc.h>
 #endif
 
-#define HELPER 1
+#if defined(EXT_FLASH)
+#include <spi.h>
+#include <spiDataFlash.h>
+#endif
+
+/*Local project includes */
+#if HELPER == 1
 #include "helper.h"
+#endif
 
-
-extern void SYS_UnlockReg(void);
-
-/*Local project modules*/
 #include "hidBlProtocol.h"
 #include "version.h"
+#include "commands.h"
+
+extern void SYS_UnlockReg(void);
 
 unsigned char usbPkt[USB_BUFFER_SIZE];
 bool usbDirty = FALSE;
 
-#define BL_APPLICATION_ENTRY 0x3000
-#define APP_START_RESET_VEC_ADDRESS (BL_APPLICATION_ENTRY + (uint32_t)0x00000004)
+extern uint32_t APP_INT_FLASH_START;
+extern uint32_t APP_INT_FLASH_LENGTH;
 
-//#define BOOT_MAGIC_VALUE extern (*((volatile uint32_t *) &BOOT_MAGIC_ADDRESS))
+const uint32_t *appIntFlashStart = (uint32_t*)&APP_INT_FLASH_START;
+const uint32_t *appIntFlashLength = (uint32_t*)&APP_INT_FLASH_LENGTH;
 
 extern uint32_t BOOT_MAGIC_ADDRESS;
+volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
 void startApp(void)
 {
     /* Pointer to the Application Section */
     void (*application_code_entry)(void);
-    uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
+    uint32_t msp = *(uint32_t *)(appIntFlashStart);
     __disable_irq();
 
     /* Rebase the Stack Pointer */
@@ -72,14 +80,19 @@ void startApp(void)
 
     /* Rebase the vector table base address */
 #if defined(__NUVO_M032K)
-    intFlashSetVectorPageAddr(BL_APPLICATION_ENTRY);
+    intFlashSetVectorPageAddr(appIntFlashStart);
 #elif defined(__SAMR21) || defined(__SAMD21)
     /* Rebase the vector table base address */
-    SCB->VTOR = ((uint32_t)BL_APPLICATION_ENTRY & SCB_VTOR_TBLOFF_Msk);
+    SCB->VTOR = ((uint32_t)appIntFlashStart & SCB_VTOR_TBLOFF_Msk);
 #endif
 
     /* Load the Reset Handler address of the application */
-    application_code_entry = (void *)*(uint32_t *)(APP_START_RESET_VEC_ADDRESS)+4;
+
+    /*The following two lines must not be combined */
+    uint32_t resetVecAddr = (uint32_t*)&APP_INT_FLASH_START;
+    resetVecAddr += 4;
+    /**************************/
+    application_code_entry = (void *)*(uint32_t *)(resetVecAddr);
     /* Jump to user Reset Handler in the application */
     __enable_irq();
     application_code_entry();
@@ -133,11 +146,11 @@ int main(void)
     /*Check for valid App*/
     bootSw = GPIO_PIN_READ(BL_SW_PORT, BL_SW_PIN);
 
-    volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
+    uint32_t msp = *(uint32_t *)(appIntFlashStart);
 
     if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
     {
-        uint32_t msp = *(uint32_t *)(BL_APPLICATION_ENTRY);
+
         if (0xffffffff != msp)
         {
             startApp();
@@ -148,6 +161,7 @@ int main(void)
             uartInit(DEBUG_UART, UART_BAUD_115200);
             printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
             printStr("No application found\r\n");
+            printHex(msp);
 #endif
         }
     }
@@ -167,11 +181,19 @@ int main(void)
     printDec(VER_MIN);
     printStr("\r\n");
 
-    //printStr("Serial number: ");
-    //printHex(SYS->PDID);
+#if defined(__NUVO_M032K)
+    printStr("Serial number: ");
+    printHex(SYS->PDID);
+    printStr("\r\n");
+#endif
 #endif
 
     delaySetup(DELAY_BASE_MILLI_SEC);
+
+#if defined(EXT_FLASH)
+    spiInit(SPI_CHAN0);
+    spiDataFlashInit(0);
+#endif
     usbInit();
     ledLastTicks = delayGetTicks();
 
@@ -187,93 +209,13 @@ int main(void)
         {
             /*Handle USB Messages*/
             hidBlProtocolDeSerialisePacket(&pkt, usbPkt);
-            uint32_t dataWord;
-
-            if(HID_BL_PROTOCOL_WRITE_INT_FLASH == pkt.packetType)
-            {
-                // printStr("Address: ");
-                // printHex(pkt.address);
-                // printStr("\r\n");
-                /*Make sure we don't erase ourself!*/
-                if(pkt.address >= BL_APPLICATION_ENTRY)
-                {
-                    if(0==(pkt.address % INT_FLASH_PAGE_SIZE))
-                    {
-                        if(-1 == intFlashErase(pkt.address))
-                            intFlashErase(pkt.address);
-                    }
-
-                    for(int i=0; i < pkt.dataLen; i+=4)
-                    {
-                        dataWord = (pkt.data[i+3] << 24)|(pkt.data[i+2] << 16)|(pkt.data[i+1] << 8)|(pkt.data[i]);
-                        intFlashWrite(pkt.address+(i), dataWord);
-                        // printHex(dataWord);
-                        // printStr(" ");
-                    }
-                    // printStr("\r\n");
-                    hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
-                    hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                    usbSend( usbPkt, USB_BUFFER_SIZE);
-                }
-                else
-                {
-                    hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
-                    hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                    usbSend( usbPkt, USB_BUFFER_SIZE);
-                }
-            }
-            else if(HID_BL_PROTOCOL_ERASE_INT_FLASH == pkt.packetType)
-            {
-                for(uint32_t i=BL_APPLICATION_ENTRY; i < 0x40000; i+=INT_FLASH_PAGE_SIZE)
-                {
-                    intFlashErase(i);
-                }
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
-                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend( usbPkt, USB_BUFFER_SIZE);
-            }
-            else if(HID_BL_PROTOCOL_RUN_INT == pkt.packetType) /* Jump to application*/
-            {
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_ACK, NULL, 0);
-                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend( usbPkt, USB_BUFFER_SIZE);
-                /*Reset to run application*/
-                sysCoreuCReset();
-            }
-            else if(HID_BL_PROTOCOL_GET_MFR_ID == pkt.packetType)
-            {
-                uint32_t mfrId = intFlashReadCID();
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_MFR_ID, (unsigned char*)&mfrId, sizeof(mfrId));
-                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend( usbPkt, USB_BUFFER_SIZE);
-            }
-            else if(HID_BL_PROTOCOL_GET_PART_ID == pkt.packetType)
-            {
-                uint32_t partId = intFlashReadPID();
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_PART_ID, (unsigned char*)&partId, sizeof(partId));
-                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend( usbPkt, USB_BUFFER_SIZE);
-            }
-            else if(HID_BL_PROTOCOL_GET_BL_VER == pkt.packetType)
-            {
-                //          printStr("Get ver\r\n");
-                uint16_t version = (VER_MAJ << 8) | VER_MIN;
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_SEND_BL_VER, (unsigned char*)&version, sizeof(version));
-                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend( usbPkt, USB_BUFFER_SIZE);
-            }
-            else /*Send NAK due to unknown command */
-            {
-                hidBlProtocolEncodePacket(&pkt, 0, HID_BL_PROTOCOL_NAK, NULL, 0);
-                hidBlProtocolSerialisePacket(&pkt, usbPkt, USB_BUFFER_SIZE);
-                usbSend( usbPkt, USB_BUFFER_SIZE);
-            }
+            commandsParser(&pkt, usbPkt);
             usbDirty = 0;
         }
 #if defined(__SAMR21) || defined(__SAMD21)
         usbTask();
 #endif
-    } /*Maine while loop */
+    } /*Main while loop */
 }
 
 void usbHidProcess(uint8_t *req)
