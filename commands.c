@@ -39,7 +39,7 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
     uint32_t dataWord = 0;
     if(HID_BL_PROTOCOL_WRITE_INT_FLASH == pkt->packetType)
     {
-        /// printStr("Address: ");
+        // printStr("Address: ");
         // printHex(pkt.address);
         // printStr("\r\n");
         /*Make sure we don't erase ourself!*/
