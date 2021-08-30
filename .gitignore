@@ -38,3 +38,4 @@ umake/*
 Makefile
 umakefile
 *.hex
+output.map
