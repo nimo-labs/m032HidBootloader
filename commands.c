@@ -151,6 +151,11 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
         unsigned long millis = delayGetTicks();
         for(volatile uint32_t i= 0; i < 0x3000; i+=4)
         {
+            if(0==((uint32_t)(i+0x3000) % INT_FLASH_PAGE_SIZE))
+            {
+                if(-1 == intFlashErase((uint32_t)(i+0x3000)))
+                    intFlashErase((uint32_t)(i+0x3000));
+            }
             if(delayMillis(millis, 1000))
             {
                 millis = delayGetTicks();
