@@ -40,7 +40,7 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
     if(HID_BL_PROTOCOL_WRITE_INT_FLASH == pkt->packetType)
     {
         // printStr("Address: ");
-        // printHex(pkt.address);
+        // printHex(pkt.address, true);
         // printStr("\r\n");
         /*Make sure we don't erase ourself!*/
         if(pkt->address >= (uint32_t)appIntFlashStart)
@@ -55,7 +55,7 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
             {
                 dataWord = (pkt->data[i+3] << 24)|(pkt->data[i+2] << 16)|(pkt->data[i+1] << 8)|(pkt->data[i]);
                 intFlashWrite(pkt->address+(i), dataWord);
-                // printHex(dataWord);
+                // printHex(dataWord, true);
                 // printStr(" ");
             }
             // printStr("\r\n");
@@ -143,12 +143,12 @@ void commandsParser(struct hidBlProtocolPacket_s *pkt, unsigned char * usbPkt)
     else if(HID_BL_PROTOCOL_WRITE_EXT_FLASH == pkt->packetType)
     {
         // printStr("Address: ");
-        // printHex(pkt->address);
+        // printHex(pkt->address, true);
         // printStr("\r\n");
         for(int i=0; i < pkt->dataLen; i++)
         {
             spiDataFlashPageWrite(0, pkt->address+EXT_FLASH_APP_LOC+i, &pkt->data[i], 1);
-            // printHex(pkt->data[i]);
+            // printHex(pkt->data[i], true);
             // printStr(" ");
         }
         //printStr("\r\n");

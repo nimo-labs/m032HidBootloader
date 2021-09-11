@@ -69,7 +69,7 @@ volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
 
 void startApp(void);
 void validAppCheck(void);
-void printVerstion(void);
+void printVersion(void);
 void m032FlashBankSwitch(void);
 
 /*---------------------------------------------------------------------------------------------------------
@@ -107,8 +107,13 @@ int main(void)
     printVersion();
 
 #if defined(__NUVO_M032K)
-    printStr("Serial number: ");
-    printHex(SYS->PDID);
+    uint32_t serialNum[3];
+    for (uint32_t i = 0; i < 3; i++)
+        serialNum[i] = intFlashReadUID(i);
+    printStr("Serial num: ");
+    printHex(serialNum[2], true);
+    printHex(serialNum[1], false);
+    printHex(serialNum[0], false);
     printStr("\r\n");
 #endif
 #endif
