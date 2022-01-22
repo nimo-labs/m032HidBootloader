@@ -10,16 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/nimo-labs/nimobuild:latest 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: 'nimo-labs/umake'
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
       with:
         path: 'bootloader'
         fetch-depth: 0
 
     - name: Update version number
-    - run: |
+      run: |
         cd bootloader
         cat version.h
         awk -f bumpver.awk version.h
@@ -28,7 +26,7 @@ jobs:
         cat version.h
 
     - name: Compile
-    - run: |
+      run: |
         cd bootloader
         ./buildall.sh
 
@@ -42,7 +40,7 @@ jobs:
           branch: dev
 
     - name: Create new tagged release
-    - uses: "marvinpinto/action-automatic-releases@latest"
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: ${{ env.NIMO_VERSION }}
@@ -52,7 +50,7 @@ jobs:
           ./*.hex
 
     - name: Update development tag
-    - uses: "marvinpinto/action-automatic-releases@latest"
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "development"

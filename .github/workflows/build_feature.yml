@@ -12,15 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/nimo-labs/nimobuild:latest 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: 'nimo-labs/umake'
+    - name: Checkout code
     - uses: actions/checkout@v2
       with:
         path: 'bootloader'
         fetch-depth: 0
 
     - name: Compile
-    - run: |
+      run: |
         cd bootloader
         ./buildall.sh
