@@ -16,19 +16,13 @@ jobs:
     - uses: actions/checkout@v2
       with:
         path: 'bootloader'
-    # - name: umake
-    #   run: |
-    #     #cd bootloader
-    #     #../umake.py
-    #     echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
         
     - name: Compile
       run: |
         cd bootloader
         ./buildall.sh
 
-#bump release if successful
-
+    - name: Create new tagged release
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"

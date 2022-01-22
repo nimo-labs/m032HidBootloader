@@ -17,14 +17,8 @@ jobs:
       with:
         path: 'bootloader'
         fetch-depth: 0
-    # - name: umake
-    #   run: |
-    #     #cd bootloader
-    #     #../umake.py
-    #     #echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
 
-#update version number
-    - name: bump version
+    - name: Update version number
       run: |
         cd bootloader
         cat version.h
@@ -47,8 +41,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: dev
 
-#bump tagged release if successful
-
+    - name: Create new tagged release
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -58,8 +51,7 @@ jobs:
         files: |
           ./*.hex
 
-#bump release if successful
-
+    - name: Update development tag
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
