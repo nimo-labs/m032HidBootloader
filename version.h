@@ -1,4 +1,4 @@
-// VERSION_NUM 0.27
+// VERSION_NUM 0.28
 #define VER_MAJ 0
-#define VER_MIN 27
+#define VER_MIN 28
 #define VER_FORK 0
