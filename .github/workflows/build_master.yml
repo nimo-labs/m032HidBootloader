@@ -8,32 +8,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: ghcr.io/nimo-labs/nimobuild:latest 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: 'nimo-labs/umake'
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
       with:
         path: 'bootloader'
-    - name: umake
-      run: |
-        #cd bootloader
-        #../umake.py
-        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
         
-    #- name: Compile
-    - uses: fiam/arm-none-eabi-gcc@v1
-      env: 
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      with:
-        release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
-    - run: |
+    - name: Compile
+      run: |
         cd bootloader
         ./buildall.sh
 
-#bump release if successful
-
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - name: Create new tagged release
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "production"

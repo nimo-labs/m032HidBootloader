@@ -8,22 +8,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: ghcr.io/nimo-labs/nimobuild:latest 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: 'nimo-labs/umake'
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
       with:
         path: 'bootloader'
         fetch-depth: 0
-    - name: umake
-      run: |
-        #cd bootloader
-        #../umake.py
-        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
 
-#update version number
-    - name: bump version
+    - name: Update version number
       run: |
         cd bootloader
         cat version.h
@@ -32,13 +25,8 @@ jobs:
         cp version.h ../
         cat version.h
 
-    #- name: Compile
-    - uses: fiam/arm-none-eabi-gcc@v1
-      env: 
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      with:
-        release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
-    - run: |
+    - name: Compile
+      run: |
         cd bootloader
         ./buildall.sh
 
@@ -51,9 +39,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: dev
 
-#bump tagged release if successful
-
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - name: Create new tagged release
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: ${{ env.NIMO_VERSION }}
@@ -62,9 +49,8 @@ jobs:
         files: |
           ./*.hex
 
-#bump release if successful
-
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - name: Update development tag
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "development"

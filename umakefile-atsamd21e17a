@@ -1,24 +1,25 @@
 {
 	"target": "atsamd21e17a_Hidbootloader",
-    "microcontroller": "atsamd21e17a",
-    "toolchain": "arm-none-eabi",
-    "c_sources": [
-        "main.c",
+	"microcontroller": "atsamd21e17a",
+	"toolchain": "arm-none-eabi",
+	"ucLib": "nimolib-atsamd21",
+	"c_sources": [
+		"main.c",
 		"hidBlProtocol.c",
 		"./usbStrings.c",
 		"commands.c",
 		"helper.c"
-    ],
-    "includes": [
-        "./"
-    ],
+	],
+	"includes": [
+		"./"
+	],
 	"linkerFile": "./umake/nimolib/uC/sam/linker/samd21e17a_bl.ld",
-    "buildDir": "./build",
-    "libraries": [
-     	{
-           	"libName": "nimolib",
-           	"libPath": "https://github.com/nimo-labs/nimolib.git",
-    		"books":[
+	"buildDir": "./build",
+	"libraries": [
+		{
+			"libName": "nimolib",
+			"libPath": "https://github.com/nimo-labs/nimolib.git",
+			"books": [
 				"gpio",
 				"delay",
 				"usbHid",
@@ -27,14 +28,18 @@
 				"sysCore",
 				"osc",
 				"uart"
-        	]
-	    }
+			]
+		},
+		{
+			"libName": "nimolib-atsamd21",
+			"libPath": "https://github.com/nimo-labs/nimolib-atsamd21.git"
+		}
 	],
-	"targets":[
+	"targets": [
 		{
 			"targetName": "program",
 			"depends": "all",
-			"content":[
+			"content": [
 				"killall -s 9 openocd || true",
 				"openocd -f ./umake/nimolib/uC/sam/openocd/openocd_ftdi.cfg -d1 -c init -c \" halt \" -c \" flash write_image erase $(BUILD)/${BIN}.hex\" -c \" verify_image $(BUILD)/${BIN}.hex\" -c \" reset run \" -c \" exit \""
 			]

@@ -16,5 +16,5 @@
  */
 
 void printStr(char *str);
-void printHex(uint32_t val);
+void printHex(uint32_t val, uint8_t prefix);
 void printDec(uint8_t val);

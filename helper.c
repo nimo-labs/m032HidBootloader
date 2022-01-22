@@ -27,10 +27,11 @@ void printStr(char *str)
         uartTx(DEBUG_UART, *str++);
 }
 
-void printHex(uint32_t val)
+void printHex(uint32_t val, uint8_t prefix)
 {
     uint8_t hex[] = "0123456789ABCDEF";
-    printStr("0x");
+    if(prefix)
+        printStr("0x");
     uartTx(DEBUG_UART, hex[(val>>28) & 0xf]);
     uartTx(DEBUG_UART, hex[(val>>24) & 0xf]);
     uartTx(DEBUG_UART, hex[(val>>20) & 0xf]);

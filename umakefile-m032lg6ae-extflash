@@ -1,17 +1,18 @@
 {
 	"target": "m032lg6ae_Hidbootloader-extflash",
-    "microcontroller": "m032lg6ae",
-    "toolchain": "arm-none-eabi",
-    "c_sources": [
-        "main.c",
+	"microcontroller": "m032lg6ae",
+	"toolchain": "arm-none-eabi",
+	"ucLib": "nimolib-m032",
+	"c_sources": [
+		"main.c",
 		"hidBlProtocol.c",
 		"./usbStrings.c",
 		"commands.c",
 		"helper.c"
-    ],
-    "includes": [
-        "./"
-    ],
+	],
+	"includes": [
+		"./"
+	],
 	"defines": [
 		"-D EXT_FLASH",
 		"-D SPI_DATAFLASH_SST25VF",
@@ -20,13 +21,13 @@
 		"-D SPI_DATAFLASH_SPI_CHAN=0",
 		"-D SPI_DATAFLASH_SIZE=SPI_DATAFLASH_4Mb"
 	],
-	"linkerFile": "./umake/nimolib/uC/m032/linker/gcc_arm_256k_32k_bl.ld",
-    "buildDir": "./build",
-    "libraries": [
-     	{
-           	"libName": "nimolib",
-           	"libPath": "https://github.com/nimo-labs/nimolib.git",
-    		"books":[
+	"linkerFile": "./umake/nimolib-m032/linker/gcc_arm_256k_32k_bl.ld",
+	"buildDir": "./build",
+	"libraries": [
+		{
+			"libName": "nimolib",
+			"libPath": "https://github.com/nimo-labs/nimolib.git",
+			"books": [
 				"gpio",
 				"delay",
 				"usbHid",
@@ -36,14 +37,18 @@
 				"uart",
 				"spi",
 				"spiDataFlash"
-        	]
-	    }
+			]
+		},
+		{
+			"libName": "nimolib-m032",
+			"libPath": "https://github.com/nimo-labs/nimolib-m032.git"
+		}
 	],
-	"targets":[
+	"targets": [
 		{
 			"targetName": "program",
 			"depends": "all",
-			"content":[
+			"content": [
 				"killall -s 9 openocd || true",
 				"~/OpenOCD/bin/openocd -f ./umake/nimolib/uC/m032/openocd/openocd.cfg -d1 -c init -c \" halt \" -c \" flash write_image erase $(BUILD)/${BIN}.hex\" -c \" verify_image $(BUILD)/${BIN}.hex\" -c \" reset run \" -c \" exit \""
 			]
@@ -51,7 +56,7 @@
 		{
 			"targetName": "chiperase",
 			"depends": "",
-			"content":[
+			"content": [
 				"killall -s 9 openocd || true",
 				"~/OpenOCD/bin/openocd -f ./umake/nimolib/uC/m032/openocd/openocd.cfg -d1 -c \" halt \" -c \" numicro chip_erase \" -c \" exit \""
 			]
