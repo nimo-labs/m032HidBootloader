@@ -4,8 +4,8 @@ for f in umakefile*
 do
 	echo "Processing $f..."
 	ln -s $f umakefile
-	../umake.py clean
-	../umake.py
+	/root/umake/umake.py clean
+	/root/umake/umake.py
 	make
 	if [ $? -eq 0 ]; then
 		echo -------------------
