@@ -19,7 +19,7 @@ jobs:
         fetch-depth: 0
 
     - name: Update version number
-      run: |
+    - run: |
         cd bootloader
         cat version.h
         awk -f bumpver.awk version.h
