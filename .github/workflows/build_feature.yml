@@ -21,6 +21,6 @@ jobs:
         fetch-depth: 0
 
     - name: Compile
-      run: |
+    - run: |
         cd bootloader
         ./buildall.sh

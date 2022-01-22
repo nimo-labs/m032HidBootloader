@@ -18,7 +18,7 @@ jobs:
         path: 'bootloader'
         
     - name: Compile
-      run: |
+    - run: |
         cd bootloader
         ./buildall.sh
 

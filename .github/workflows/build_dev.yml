@@ -28,7 +28,7 @@ jobs:
         cat version.h
 
     - name: Compile
-      run: |
+    - run: |
         cd bootloader
         ./buildall.sh
 
