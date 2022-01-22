@@ -1,6 +1,6 @@
 {
-	"target": "m032lg6ae_Hidbootloader",
-	"microcontroller": "m032lg6ae",
+	"target": "m032td2ae_Hidbootloader",
+	"microcontroller": "m032td2ae",
 	"toolchain": "arm-none-eabi",
 	"ucLib": "nimolib-m032",
 	"c_sources": [
@@ -13,7 +13,7 @@
 	"includes": [
 		"./"
 	],
-	"linkerFile": "./umake/nimolib-m032/linker/gcc_arm_256k_32k_bl.ld",
+	"linkerFile": "./umake/nimolib-m032/linker/gcc_arm_td2ae_bl.ld",
 	"buildDir": "./build",
 	"libraries": [
 		{
@@ -40,7 +40,7 @@
 			"depends": "all",
 			"content": [
 				"killall -s 9 openocd || true",
-				"~/OpenOCD/bin/openocd -f ./umake/nimolib/uC/m032/openocd/openocd.cfg -d1 -c init -c \" halt \" -c \" flash write_image erase $(BUILD)/${BIN}.hex\" -c \" verify_image $(BUILD)/${BIN}.hex\" -c \" reset run \" -c \" exit \""
+				"~/OpenOCD/bin/openocd -f ./umake/nimolib-m032/openocd/openocd.cfg -d1 -c init -c \" halt \" -c \" flash write_image erase $(BUILD)/${BIN}.hex\" -c \" verify_image $(BUILD)/${BIN}.hex\" -c \" reset run \" -c \" exit \""
 			]
 		}
 	]
