@@ -64,8 +64,7 @@ extern uint32_t APP_INT_FLASH_LENGTH;
 const uint32_t *appIntFlashStart = (uint32_t*)&APP_INT_FLASH_START;
 const uint32_t *appIntFlashLength = (uint32_t*)&APP_INT_FLASH_LENGTH;
 
-extern uint32_t BOOT_MAGIC_ADDRESS;
-volatile uint32_t * bootMagicAddress = &BOOT_MAGIC_ADDRESS;
+__attribute__((section(".blcomms"))) volatile int blcomms;
 
 void startApp(void);
 void validAppCheck(void);
@@ -200,7 +199,7 @@ void validAppCheck(void)
 
     uint32_t msp = *(uint32_t *)(appIntFlashStart);
 
-    if((0 == bootSw) && (0x0000DEAD != *bootMagicAddress))
+    if((0 == bootSw) && (0x0000DEAD != blcomms))
     {
 
         if (0xffffffff != msp)
@@ -220,6 +219,7 @@ void validAppCheck(void)
     {
 #if HELPER == 1
         uartInit(DEBUG_UART, UART_BAUD_115200);
+        blcomms = 0;
         printStr("\r\n\r\nmicroNIMO Bootloader\r\n");
         printStr("Bootloader mode requested\r\n");
 #endif

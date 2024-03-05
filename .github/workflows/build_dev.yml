@@ -31,7 +31,7 @@ jobs:
         ./buildall.sh
 
 
-    - name: commit version
+    - name: Commit version
       uses: test-room-7/action-update-file@v1
       with:
           file-path: version.h

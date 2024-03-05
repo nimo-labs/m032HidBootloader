@@ -58,7 +58,7 @@
 			"depends": "",
 			"content": [
 				"killall -s 9 openocd || true",
-				"~/OpenOCD/bin/openocd -f ./umake/nimolib/uC/m032/openocd/openocd.cfg -d1 -c \" halt \" -c \" numicro chip_erase \" -c \" exit \""
+				"~/OpenOCD/bin/openocd -f ./umake/nimolib-m032/openocd/openocd.cfg -d1 -c \" halt \" -c \" numicro chip_erase \" -c \" exit \""
 			]
 		}
 	]
