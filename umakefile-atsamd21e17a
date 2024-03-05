@@ -13,7 +13,7 @@
 	"includes": [
 		"./"
 	],
-	"linkerFile": "./umake/nimolib/uC/sam/linker/samd21e17a_bl.ld",
+	"linkerFile": "./umake/nimolib-atsamd21/linker/samd21e17a_bl.ld",
 	"buildDir": "./build",
 	"libraries": [
 		{
